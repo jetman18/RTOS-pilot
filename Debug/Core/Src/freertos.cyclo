@@ -1,0 +1,9 @@
+../Core/Src/../Driver/interrupt.h:15:6:HAL_UART_RxCpltCallback	3
+../Core/Src/../Driver/interrupt.h:26:6:HAL_UART_TxCpltCallback	1
+../Core/Src/../Driver/interrupt.h:34:6:HAL_GPIO_EXTI_Callback	1
+../Core/Src/freertos.c:92:6:vApplicationGetIdleTaskMemory	1
+../Core/Src/freertos.c:106:6:MX_FREERTOS_Init	1
+../Core/Src/freertos.c:162:6:ahrs_task	1
+../Core/Src/freertos.c:200:6:blackbox	1
+../Core/Src/freertos.c:246:6:led_indicate	2
+../Core/Src/freertos.c:276:6:read_sensor	3

@@ -1,0 +1,6 @@
+../Core/Lib/maths.h:163:12:constrain	3
+../Core/Lib/compass.c:48:6:compassInit	2
+../Core/Lib/compass.c:77:6:compass_get	1
+../Core/Lib/compass.c:94:6:test_compass	1
+../Core/Lib/compass.c:116:6:read_calibrate_file	2
+../Core/Lib/compass.c:141:13:compass_calibrate	15

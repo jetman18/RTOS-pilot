@@ -1,0 +1,8 @@
+../Core/Driver/mpu6050.c:98:8:mpu6050Connection	1
+../Core/Driver/mpu6050.c:102:8:mpu6050connectFlag	1
+../Core/Driver/mpu6050.c:109:8:mpu6050_init	2
+../Core/Driver/mpu6050.c:169:6:mpu6050_gyro_get_raw	1
+../Core/Driver/mpu6050.c:194:6:mpu6050_acc_get_raw	1
+../Core/Driver/mpu6050.c:219:6:mpu_read_all	1
+../Core/Driver/mpu6050.c:242:9:get_axis_register	1
+../Core/Driver/mpu6050.c:250:13:write_byte	1

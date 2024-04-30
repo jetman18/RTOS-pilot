@@ -1,0 +1,7 @@
+../Core/Lib/maths.h:163:12:constrain	24	static
+../Core/Lib/timer.c:9:17:setoverFlow	24	static
+../Core/Lib/timer.c:17:6:timer_calculate_boottime	8	static
+../Core/Lib/timer.c:25:6:timer_start	16	static
+../Core/Lib/timer.c:30:20:timer_name	4	static
+../Core/Lib/timer.c:34:6:resetCounter	4	static
+../Core/Lib/timer.c:37:6:timer_callback	4	static

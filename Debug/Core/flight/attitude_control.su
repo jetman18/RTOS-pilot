@@ -1,0 +1,4 @@
+../Core/flight/../Lib/maths.h:163:12:constrain	24	static
+../Core/flight/../Lib/maths.h:173:21:constrainf	24	static
+../Core/flight/attitude_control.c:34:6:attitude_ctrl_init	24	static
+../Core/flight/attitude_control.c:44:6:attitude_ctrl	88	static

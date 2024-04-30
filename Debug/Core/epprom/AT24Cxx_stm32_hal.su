@@ -1,0 +1,9 @@
+../Core/epprom/AT24Cxx_stm32_hal.c:34:10:AT24Cxx_get_max_addr	16	static
+../Core/epprom/AT24Cxx_stm32_hal.c:63:10:AT24Cxx_get_pg_size	16	static
+../Core/epprom/AT24Cxx_stm32_hal.c:92:21:AT24Cxx_init	32	static
+../Core/epprom/AT24Cxx_stm32_hal.c:116:21:AT24Cxx_add_dev	32	static
+../Core/epprom/AT24Cxx_stm32_hal.c:140:19:AT24Cxx_get_dev	16	static
+../Core/epprom/AT24Cxx_stm32_hal.c:145:21:AT24Cxx_write_byte	32	static
+../Core/epprom/AT24Cxx_stm32_hal.c:159:21:AT24Cxx_write_byte_buffer	56	static
+../Core/epprom/AT24Cxx_stm32_hal.c:215:21:AT24Cxx_read_byte	40	static
+../Core/epprom/AT24Cxx_stm32_hal.c:228:21:AT24Cxx_read_byte_buffer	40	static

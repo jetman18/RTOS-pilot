@@ -1,0 +1,3 @@
+../Core/Driver/../Lib/maths.h:163:12:constrain	24	static
+../Core/Driver/qmc5883.c:13:6:qmc5883_init	32	static
+../Core/Driver/qmc5883.c:24:6:qmc_get_raw	40	static
