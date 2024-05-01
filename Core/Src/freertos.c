@@ -126,11 +126,11 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of task1 */
-  osThreadDef(task1, ahrs_task, osPriorityHigh, 0, 200);
+  osThreadDef(task1, ahrs_task, osPriorityHigh, 0, 128);
   task1Handle = osThreadCreate(osThread(task1), NULL);
 
   /* definition and creation of task2 */
-  osThreadDef(task2, blackbox, osPriorityLow, 0, 200);
+  osThreadDef(task2, blackbox, osPriorityHigh, 0, 200);
   task2Handle = osThreadCreate(osThread(task2), NULL);
 
   /* definition and creation of task3 */
@@ -162,12 +162,15 @@ uint16_t stack_task_ahrs;
 void ahrs_task(void const * argument)
 {
   /* USER CODE BEGIN ahrs_task */
+	ibus_init(&huart1);
+	gps_init(&huart3,57600);
+	attitude_ctrl_init();
+	initPWM(&htim3);
+
 	uint32_t last_call = micros();
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 10;
 	xLastWakeTime = xTaskGetTickCount();
-	ibus_init(&huart1);
-	gps_init(&huart3,57600);
   /* Infinite loop */
   for(;;)
   {
@@ -178,6 +181,8 @@ void ahrs_task(void const * argument)
 
     ibusFrameComplete();
     update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],dt);
+    attitude_ctrl();
+
     vTaskSuspend(NULL);
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
     stack_task_ahrs = uxTaskGetStackHighWaterMark( NULL );
@@ -187,7 +192,6 @@ void ahrs_task(void const * argument)
 }
 
 /* USER CODE BEGIN Header_blackbox */
-
 black_box_file_t fdata;
 uint16_t stack_task_blackbox;
 /**
@@ -199,15 +203,17 @@ uint16_t stack_task_blackbox;
 void blackbox(void const * argument)
 {
   /* USER CODE BEGIN blackbox */
-  //vTaskSuspend(task1Handle);
-  //vTaskSuspend(NULL);
-  black_box_init();
-  black_box_create_file(&fdata,"fdata.txt");
-  //vTaskResume(task1Handle);
+	vTaskSuspend(NULL);
+	//black_box_init();
+	//black_box_create_file(&fdata,"fdata.txt");
 
+	TickType_t xLastWakeTime;
+	const TickType_t xFrequency = 200;
+	xLastWakeTime = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
+/*
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
 		black_box_pack_int(&fdata,(int)AHRS.roll);
 		black_box_pack_str(&fdata," ");
@@ -226,9 +232,9 @@ void blackbox(void const * argument)
 		black_box_sync(&fdata);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
 
-
-	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
-    osDelay(1000);
+*/
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_6);
+	vTaskDelayUntil( &xLastWakeTime, xFrequency);
     stack_task_blackbox = uxTaskGetStackHighWaterMark( NULL );
   }
   /* USER CODE END blackbox */
@@ -252,12 +258,15 @@ void led_indicate(void const * argument)
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
 		delay = 100;
+		vTaskResume(task2Handle);
 	}
 	else{
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 		delay = 500;
+		vTaskSuspend(task2Handle);
 	}
+
     osDelay(delay);
   }
   /* USER CODE END led_indicate */

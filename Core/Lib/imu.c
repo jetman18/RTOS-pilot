@@ -240,10 +240,9 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
 		 yaw_ = 360 + yaw_;
 	}
 	AHRS.yaw =  yaw_;
-	AHRS.roll_rate  = gy;
-	AHRS.pitch_rate = gx;
-	AHRS.yaw_rate   = gz;
+	AHRS.roll_rate  = gx_/config.gyr_lsb;
+	AHRS.pitch_rate = -gy_/config.gyr_lsb;
+	AHRS.yaw_rate   = -gz_/config.gyr_lsb;
 
-		
 }
 
