@@ -6,7 +6,6 @@
 #define IBUS_SYNCBYTE 0x20
 #define FALSE 0
 #define TRUE 1
-
 //#define DMA_MODE
 
 static int ibusFrameDone = FALSE;

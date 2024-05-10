@@ -22,7 +22,7 @@ void mavlink_tx_cpl_callback();
 void mavlink_send_attitude(float roll,float pitch, float yaw, float lat,float lon, float alt);
 
 // attitude contrller
-void attitude_ctrl();
+void attitude_ctrl(float dt);
 void attitude_ctrl_init();
 // mainloop
 void main_loop();

@@ -7,7 +7,6 @@
 #include "../Driver/hmc5883.h"
 #include "../Driver/qmc5883.h"
 
-#include "blackbox.h"
 #include "maths.h"
 #include "compass.h"
 #include "timer.h"
@@ -15,6 +14,8 @@
 #include "axis.h"
 
 #include "../epprom/AT24Cxx_stm32_hal.h"
+
+#include "blackbox.h"
 
 
 #define QMC5883

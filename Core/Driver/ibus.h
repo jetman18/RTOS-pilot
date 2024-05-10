@@ -26,7 +26,7 @@ enum index{
 	CH9,
 	CH10
 };
-
+#define CHANNEL_HIGH 1700
 #define IBUS_MAX_CHANNEL 10
 extern uint32_t ibusChannelData[IBUS_MAX_CHANNEL];
 

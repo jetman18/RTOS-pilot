@@ -1,7 +1,7 @@
 ../Core/Lib/maths.h:163:12:constrain	3
-../Core/Lib/timer.c:9:17:setoverFlow	1
-../Core/Lib/timer.c:17:6:timer_calculate_boottime	1
-../Core/Lib/timer.c:25:6:timer_start	1
-../Core/Lib/timer.c:30:20:timer_name	1
-../Core/Lib/timer.c:34:6:resetCounter	1
-../Core/Lib/timer.c:37:6:timer_callback	1
+../Core/Lib/timer.c:9:17:setoverFlow	2
+../Core/Lib/timer.c:20:6:timer_calculate_boottime	1
+../Core/Lib/timer.c:28:6:timer_start	1
+../Core/Lib/timer.c:33:20:timer_name	1
+../Core/Lib/timer.c:37:6:resetCounter	1
+../Core/Lib/timer.c:40:6:timer_callback	1

@@ -1,5 +1,6 @@
 #include "sensordetect.h"
 #include "i2c.h"
+
 #include "blackbox.h"
 
 typedef struct{
@@ -17,16 +18,12 @@ sensor_t sensor_list[SENSOR_COUNT] ={
    /* more */
 };
 uint8_t sensor_[SENSOR_COUNT];
-black_box_file_t sensor_file;
 /*
  * Scan i2c address 0 to 127
  * Return number of sensor
  */
 void i2cDectect(I2C_HandleTypeDef *i2c){
 	uint8_t sensor_count = 0;
-
-    // black box
-    //black_box_create_file(&sensor_file,"sensorDetected.txt");
 
 	for(int i=0; i<128; i++){
 		uint8_t temp = HAL_I2C_IsDeviceReady(i2c,(uint16_t)(i<<1), 3,1000);
@@ -44,22 +41,6 @@ void i2cDectect(I2C_HandleTypeDef *i2c){
 		}
 	}
 	
-    black_box_pack_str(&sensor_file,"Detected: ");
-    black_box_pack_int(&sensor_file,(int)sensor_count);
-    black_box_pack_str(&sensor_file," devices");
-    black_box_pack_str(&sensor_file,"\n");
-   
-    for (uint8_t i = 0; i < SENSOR_COUNT; i++){
-        if(!sensor_list[i].valid){
-            black_box_pack_str(&sensor_file,"---->");  
-            black_box_pack_str(&sensor_file,sensor_list[i].name);
-            black_box_pack_str(&sensor_file,"\n");  
-        }
-    }
- 
-  black_box_load(&sensor_file);
-  black_box_close(&sensor_file);
-
 }
 
 

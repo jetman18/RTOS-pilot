@@ -8,7 +8,7 @@
 #include "compass.h"
 #include "i2c.h"
 #include "utils.h"
-
+#include "../Driver/ibus.h"
 #include "../Driver/mpu6050.h"
 #include "../Driver/hmc5883.h"
 
@@ -22,7 +22,7 @@ float integralFBz;
 float acc_Eframe[3];
 
 const float Ki_imu = 0;
-const float Kp_imu = 1;
+float Kp_imu = 0.2;
 const float Kp_mag = 5;
 
 float q0=1,q1=0,q2=0,q3=0;
@@ -87,7 +87,7 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     float gx,gy,gz;
     float acc_x,acc_y,acc_z;
     float vx, vy, vz;
-    float emx,emy,emz,wx,wy,wz;
+    float emz,wx,wy;
     float mx,my,mz,hx,hy,bx,bz;
 
 	gx = (gx_/config.gyr_lsb) * RAD;
@@ -121,15 +121,9 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
 
 			wx = bx * dcm[0][0] + bz * dcm[0][2];
 			wy = bx * dcm[1][0] + bz * dcm[1][2];
-			wz = bx * dcm[2][0] + bz * dcm[2][2];
-
-			emx = my * wz - mz * wy;
-			emy = mz * wx - mx * wz;
 			emz = mx * wy - my * wx;
 		}
 		else{
-			emx = 0.0f;
-			emy = 0.0f;
 			emz = 0.0f;
 		}
 

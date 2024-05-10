@@ -1,5 +1,5 @@
-#ifndef LPF_H
-#define LPF_H
+#ifndef _FILTER_H
+#define _FILTER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +12,7 @@ extern "C" {
 // 1oder
 static inline float pt1FilterGain(float f_cut, float dT){
     float RC = 1 / (2 * M_PIf * f_cut);
-    return dT*(1e-06) / (RC + dT*(1e-06));
+    return dT/ (RC + dT);
 }
 
 static inline void pt1FilterApply(float *output,float input,float f_cut,uint32_t dT)

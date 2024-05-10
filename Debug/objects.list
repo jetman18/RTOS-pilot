@@ -31,7 +31,7 @@
 "./Core/Src/usart.o"
 "./Core/Startup/startup_stm32f103vctx.o"
 "./Core/epprom/AT24Cxx_stm32_hal.o"
-"./Core/flight/attitude_control.o"
+"./Core/flight/attitude.o"
 "./Core/flight/estimate.o"
 "./Core/flight/mavlink_handler.o"
 "./Core/flight/navigation.o"

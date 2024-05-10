@@ -1,4 +1,4 @@
-Core/Lib/imu.o: ../Core/Lib/imu.c ../Core/Lib/imu.h \
+Core/flight/attitude.o: ../Core/flight/attitude.c ../Core/flight/plane.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
@@ -27,12 +27,12 @@ Core/Lib/imu.o: ../Core/Lib/imu.c ../Core/Lib/imu.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Lib/axis.h ../Core/Lib/maths.h ../Core/Lib/filter.h \
- ../Core/Lib/timer.h ../Core/Lib/compass.h ../Core/Inc/i2c.h \
- ../Core/Inc/main.h ../Core/Lib/utils.h ../Core/Lib/../Driver/ibus.h \
- ../Core/Lib/../Driver/mpu6050.h ../Core/Lib/../Driver/../Lib/axis.h \
- ../Core/Lib/../Driver/hmc5883.h ../Core/Lib/../Driver/../lib/axis.h
-../Core/Lib/imu.h:
+ ../Core/flight/../Lib/pid.h ../Core/flight/../Lib/imu.h \
+ ../Core/flight/../Lib/axis.h ../Core/flight/../Lib/maths.h \
+ ../Core/flight/../Lib/pwm.h ../Core/Inc/tim.h ../Core/Inc/main.h \
+ ../Core/flight/../Lib/timer.h ../Core/flight/../Driver/ibus.h \
+ ../Core/flight/../Lib/gps.h ../Core/flight/../Lib/filter.h
+../Core/flight/plane.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h:
@@ -61,16 +61,14 @@ Core/Lib/imu.o: ../Core/Lib/imu.c ../Core/Lib/imu.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
-../Core/Lib/axis.h:
-../Core/Lib/maths.h:
-../Core/Lib/filter.h:
-../Core/Lib/timer.h:
-../Core/Lib/compass.h:
-../Core/Inc/i2c.h:
+../Core/flight/../Lib/pid.h:
+../Core/flight/../Lib/imu.h:
+../Core/flight/../Lib/axis.h:
+../Core/flight/../Lib/maths.h:
+../Core/flight/../Lib/pwm.h:
+../Core/Inc/tim.h:
 ../Core/Inc/main.h:
-../Core/Lib/utils.h:
-../Core/Lib/../Driver/ibus.h:
-../Core/Lib/../Driver/mpu6050.h:
-../Core/Lib/../Driver/../Lib/axis.h:
-../Core/Lib/../Driver/hmc5883.h:
-../Core/Lib/../Driver/../lib/axis.h:
+../Core/flight/../Lib/timer.h:
+../Core/flight/../Driver/ibus.h:
+../Core/flight/../Lib/gps.h:
+../Core/flight/../Lib/filter.h:

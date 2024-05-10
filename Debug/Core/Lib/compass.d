@@ -29,8 +29,11 @@ Core/Lib/compass.o: ../Core/Lib/compass.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/i2c.h ../Core/Inc/main.h ../Core/Inc/gpio.h \
  ../Core/Lib/../Driver/hmc5883.h ../Core/Lib/../Driver/../lib/axis.h \
- ../Core/Lib/../Driver/qmc5883.h ../Core/Lib/blackbox.h \
- ../FATFS/App/fatfs.h ../Middlewares/Third_Party/FatFs/src/ff.h \
+ ../Core/Lib/../Driver/qmc5883.h ../Core/Lib/maths.h \
+ ../Core/Lib/compass.h ../Core/Lib/axis.h ../Core/Lib/timer.h \
+ ../Core/Lib/faulthandler.h ../Core/Lib/../epprom/AT24Cxx_stm32_hal.h \
+ ../Core/Lib/blackbox.h ../FATFS/App/fatfs.h \
+ ../Middlewares/Third_Party/FatFs/src/ff.h \
  ../Middlewares/Third_Party/FatFs/src/integer.h ../FATFS/Target/ffconf.h \
  ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h \
@@ -54,10 +57,7 @@ Core/Lib/compass.o: ../Core/Lib/compass.c \
  ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h \
  ../Middlewares/Third_Party/FatFs/src/diskio.h \
  ../Middlewares/Third_Party/FatFs/src/ff.h \
- ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h \
- ../Core/Lib/maths.h ../Core/Lib/compass.h ../Core/Lib/axis.h \
- ../Core/Lib/timer.h ../Core/Lib/faulthandler.h \
- ../Core/Lib/../epprom/AT24Cxx_stm32_hal.h
+ ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h
 ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h:
 ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xe.h:
 ../Drivers/CMSIS/Include/core_cm3.h:
@@ -92,6 +92,12 @@ Core/Lib/compass.o: ../Core/Lib/compass.c \
 ../Core/Lib/../Driver/hmc5883.h:
 ../Core/Lib/../Driver/../lib/axis.h:
 ../Core/Lib/../Driver/qmc5883.h:
+../Core/Lib/maths.h:
+../Core/Lib/compass.h:
+../Core/Lib/axis.h:
+../Core/Lib/timer.h:
+../Core/Lib/faulthandler.h:
+../Core/Lib/../epprom/AT24Cxx_stm32_hal.h:
 ../Core/Lib/blackbox.h:
 ../FATFS/App/fatfs.h:
 ../Middlewares/Third_Party/FatFs/src/ff.h:
@@ -120,9 +126,3 @@ Core/Lib/compass.o: ../Core/Lib/compass.c \
 ../Middlewares/Third_Party/FatFs/src/diskio.h:
 ../Middlewares/Third_Party/FatFs/src/ff.h:
 ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h:
-../Core/Lib/maths.h:
-../Core/Lib/compass.h:
-../Core/Lib/axis.h:
-../Core/Lib/timer.h:
-../Core/Lib/faulthandler.h:
-../Core/Lib/../epprom/AT24Cxx_stm32_hal.h:

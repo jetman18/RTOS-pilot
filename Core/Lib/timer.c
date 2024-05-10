@@ -9,6 +9,9 @@ uint32_t _micros;
 static uint16_t setoverFlow(int val,int flow_val){
     uint8_t k,l;
     l =flow_val + 1;
+    if(l == 0){
+      return 0;
+    }
     k = val/l;
     k = val - (l*k);
     return k;

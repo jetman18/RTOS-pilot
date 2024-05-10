@@ -1,2 +1,2 @@
-../Core/Lib/sensordetect.c:25:6:i2cDectect	8
-../Core/Lib/sensordetect.c:69:8:get_sensor_status	3
+../Core/Lib/sensordetect.c:25:6:i2cDectect	6
+../Core/Lib/sensordetect.c:50:8:get_sensor_status	3

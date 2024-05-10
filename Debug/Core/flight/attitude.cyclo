@@ -1,0 +1,5 @@
+../Core/flight/../Lib/maths.h:163:12:constrain	3
+../Core/flight/../Lib/maths.h:173:21:constrainf	3
+../Core/flight/../Lib/filter.h:13:21:pt1FilterGain	1
+../Core/flight/attitude.c:43:6:attitude_ctrl_init	1
+../Core/flight/attitude.c:56:6:attitude_ctrl	10
