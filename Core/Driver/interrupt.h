@@ -9,6 +9,7 @@ extern "C" {
 #include "stm32f1xx_hal.h"
 #include "ibus.h"
 #include "../Lib/gps.h"
+#include "../flight/plane.h"
 
 // IQR function
 //----------------------------------IQR--Handler-----------------------------
@@ -25,10 +26,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-  //  if(huart == mavlink_uart_port())
-//	{
-//		mavlink_tx_cpl_callback();
- //   }
+    if(huart == &huart1)
+	{
+		mavlink_tx_cpl_callback();
+    }
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)

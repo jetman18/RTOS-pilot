@@ -2,6 +2,33 @@
 #include "../Lib/utils.h"
 #include "../Lib/imu.h"
 #include "../Driver/ibus.h"
+#include "../Lib/maths.h"
+
+static float gravity  = -9.81 ;
+static float toDeg = 57.29577;
+static float toRad = 0.01745;
+static float Cd = 0.01;
+static float weigh = 0.8; // kg
+
+static float velocity = 0;
+
+float dynamic_speed_esitmate(float dt){
+    float Thrust = (float)(ibusChannelData[CH3] - 1000) * 0.009;
+    float acc = (Thrust - sign(velocity)*sq(velocity)*Cd + weigh * gravity * sin_approx(AHRS.pitch*RAD))/weigh;
+    velocity += acc*dt;
+    return velocity;
+}
+
+
+
+
+
+
+
+
+
+
+
 /*
 #define Dt 0.0125f
 // constan variables

@@ -16,8 +16,7 @@
 #define MAX_WAIT_TIME 0.1f
 #define F_CUT_OFF  0
 const float ff_pitch_gain = 1;
-const float ff_roll_gain = 1;
-
+const float ff_roll_gain = 2;
 
 extern attitude_t AHRS;
 
@@ -25,11 +24,12 @@ float roll_desired;
 float pitch_desired;
 
 int8_t speed_filter_reset;
-
+// angle stabilize
 static pid_t roll_rate_pid,pitch_rate_pid;
 static pid_t roll_angle_pid,pitch_angle_pid;
+// rate stabilize
+static pid_t roll_rate_t,pitch_rate_t;
 
-uint16_t servoL,servoR;
 static int16_t smooth_ch1=0, smooth_ch2=0;
 
 float roll_pid_rc_gain;
@@ -40,16 +40,22 @@ float pitch_trim;
 
 float ab_speed_filted;
 
+float v_estimate;
+
 void attitude_ctrl_init(){
 
    speed_filter_reset = TRUE;
    ab_speed_filted = 0.0f;
    // init pid 
-   pid_init(&roll_angle_pid,6,0,0,F_CUT_OFF,100);
+   pid_init(&roll_angle_pid,4,0,0,F_CUT_OFF,100);
    pid_init(&roll_rate_pid,5,2.5,0,F_CUT_OFF,300);
 
    pid_init(&pitch_angle_pid,4,0,0,F_CUT_OFF,100);
    pid_init(&pitch_rate_pid,5,2.5,0,F_CUT_OFF,300);
+
+   // rate 
+   pid_init(&roll_rate_t,4,0,0,F_CUT_OFF,300);
+   pid_init(&pitch_rate_t,4,0,0,F_CUT_OFF,300);
 
 }
 
@@ -57,6 +63,7 @@ void attitude_ctrl(float dt){
     if(dt < 0 || dt > MAX_WAIT_TIME){
         return;
     }
+    uint16_t servoL,servoR;
 
     float roll_rate_measurement = AHRS.roll_rate;
     float pitch_rate_measurement = AHRS.pitch_rate;
@@ -68,9 +75,10 @@ void attitude_ctrl(float dt){
     roll_desired = ((int)ibusChannelData[0] - 1500)*0.15f;
 	pitch_desired = ((int)ibusChannelData[1] - 1500)*-0.15f;
 
+    v_estimate = dynamic_speed_esitmate(dt);
+
     // pid scale with velocity
 	float pid_velo_scale;
-
     if(_gps.fix > 1){
         float vn = (float)_gps.velocity[0]/100;  // m
         float ve = (float)_gps.velocity[1]/100;  // m
@@ -83,7 +91,7 @@ void attitude_ctrl(float dt){
             speed_filter_reset = FALSE;
         }
         ab_speed_filted += pt1FilterGain(10,dt)*(absolute_velocity - ab_speed_filted);
-        pid_velo_scale = 1.0/(1 + sq(ab_speed_filted)*0.0035f);
+        pid_velo_scale = 1.0/(1 + sq(ab_speed_filted)*0.001f);
     }
     else{
         speed_filter_reset = TRUE;
@@ -91,12 +99,12 @@ void attitude_ctrl(float dt){
     	if(ibusChannelData[CH6] > CHANNEL_HIGH){
     		pid_velo_scale = 1;
     	}else{
-    		pid_velo_scale = 0.3f;
+    		pid_velo_scale = 0.5f;
     	}
     }
 
-    float pid_roll_vel_scale = constrainf(pid_velo_scale,0.3f,1.0f);
-    float pid_pitch_vel_scale = constrainf(pid_velo_scale,0.3f,1.0f);
+    float pid_roll_vel_scale = constrainf(pid_velo_scale,0.5f,1.0f);
+    float pid_pitch_vel_scale = constrainf(pid_velo_scale,0.5f,1.0f);
 
     // stablize mode
     if(ibusChannelData[CH5] > CHANNEL_HIGH ){
@@ -111,12 +119,12 @@ void attitude_ctrl(float dt){
         
         // roll axis
         float r_angle_pid =  pid_calculate(&roll_angle_pid,roll_measurement,roll_desired + roll_trim,dt);
-        float r_rate_pid  = -pid_calculate(&roll_rate_pid,-roll_rate_measurement,r_angle_pid,dt);
+        float r_rate_pid  =  pid_calculate(&roll_rate_pid, roll_rate_measurement,r_angle_pid,dt);
         //float FF_roll = r_angle_pid*ff_roll_gain;
-        //r_rate_pid = r_rate_pid - FF_roll;
+        //r_rate_pid = r_rate_pid + FF_roll;
         //pitch axis
         float p_angle_pid =  pid_calculate(&pitch_angle_pid,pitch_measurement,pitch_desired + pitch_trim,dt);
-        float p_rate_pid  = -pid_calculate(&pitch_rate_pid,-pitch_rate_measurement,p_angle_pid,dt);
+        float p_rate_pid  =  pid_calculate(&pitch_rate_pid, pitch_rate_measurement,p_angle_pid,dt);
         //float FF_pitch = p_angle_pid*ff_pitch_gain;
         //p_rate_pid = p_rate_pid - FF_pitch;
         r_rate_pid = r_rate_pid * pid_roll_vel_scale  * roll_pid_rc_gain;
@@ -125,13 +133,13 @@ void attitude_ctrl(float dt){
 		if(ibusChannelData[CH9] > CHANNEL_HIGH ){
 				int s1 = 1500 - ibusChannelData[CH2];
 
-				servoL = 1500 + r_rate_pid + s1;// - pitch_pid_filted;
-				servoR = 1500 - r_rate_pid + s1;// - pitch_pid_filted;
+				servoL = 1500 - r_rate_pid + s1;// - pitch_pid_filted;
+				servoR = 1500 + r_rate_pid + s1;// - pitch_pid_filted;
 		}else{
 				int s1 = 1500 - ibusChannelData[CH1];
 
-				servoL = 1500 +  s1 - p_rate_pid;
-				servoR = 1500 -  s1 - p_rate_pid;
+				servoL = 1500 +  s1 + p_rate_pid;
+				servoR = 1500 -  s1 + p_rate_pid;
 		}
 
 		if(ibusChannelData[CH10] > CHANNEL_HIGH ){
@@ -160,5 +168,56 @@ void attitude_ctrl(float dt){
 
 }
 
+/*
+        // roll axis
+        float r_angle_pid =  pid_calculate(&roll_angle_pid,roll_measurement,roll_desired + roll_trim,dt);
+        float r_rate_pid  = -pid_calculate(&roll_rate_pid,-roll_rate_measurement,r_angle_pid,dt);
+        float FF_roll = r_angle_pid*ff_roll_gain;
+        r_rate_pid = r_rate_pid + FF_roll;
+        //pitch axis
+        float p_angle_pid =  pid_calculate(&pitch_angle_pid,pitch_measurement,pitch_desired + pitch_trim,dt);
+        float p_rate_pid  = -pid_calculate(&pitch_rate_pid,-pitch_rate_measurement,p_angle_pid,dt);
+*/
 
+void rate_stabilize(float dt){
+    uint16_t servoL;
+    uint16_t servoR;
+
+    v_estimate = dynamic_speed_esitmate(dt);
+
+    if(ibusChannelData[CH5] > CHANNEL_HIGH ){
+        float roll_rate_measurement = AHRS.roll_rate;
+        float pitch_rate_measurement = AHRS.pitch_rate;
+
+        float roll_rate_desired = ((int)ibusChannelData[0] - 1500)*0.5f;
+        float pitch_rate_desired = ((int)ibusChannelData[1] - 1500)*-0.5f;
+
+        // pid scale with velocity
+        float pid_velo_scale = 1.0/(1 + sq(v_estimate)*0.0035f);
+
+        float r_rate  =  pid_calculate(&roll_rate_t, roll_rate_measurement,roll_rate_desired,dt);
+        float p_rate  =  pid_calculate(&pitch_rate_t, pitch_rate_measurement,pitch_rate_desired,dt);
+        
+        r_rate *= pid_velo_scale;
+        p_rate *= pid_velo_scale;
+
+        int s1 = 1500 - ibusChannelData[CH2];
+
+        servoL = 1500 - r_rate + s1;// - pitch_pid_filted;
+        servoR = 1500 + r_rate + s1;// - pitch_pid_filted;
+        
+     }else{
+        int s1 = 1500 - ibusChannelData[CH1];
+        int s2 = 1500 - ibusChannelData[CH2];
+            
+        servoL = 1500 + s1 + s2;
+        servoR = 1500 - s1 + s2;
+    }
+
+    servoL = constrain(servoL,SERVO_MIN_PWM,SERVO_MAX_PWM);
+    servoR = constrain(servoR,SERVO_MIN_PWM,SERVO_MAX_PWM);
+
+    write_pwm_ctrl(ibusChannelData[CH3],servoL,servoR);
+
+}
 

@@ -42,23 +42,22 @@ static uint16_t ms5611_c[PROM_NB];  // on-chip ROM
 
 static I2C_HandleTypeDef *hi2c = NULL;
 static uint32_t baro_timer;
-static float seaLevelPress;
-static uint8_t readStep;
+int32_t altitude_offset;
 
-
-//black_box_file_t alt_;
 void ms5611_init(I2C_HandleTypeDef *hi2c2)
 {
     hi2c = hi2c2;
-    readStep = 0;
     baro_timer = millis();
-	ms5611_altitude = 0;
+	altitude_offset = 0;
 	//black_box_create_file(&alt_,"alt_data.txt");
     // reset sensor
     ms5611_reset();
+    //uint8_t divide_count = 0;
     // read all coefficients
-    for (int i = 0; i < PROM_NB; i++)
+    for (int i = 0; i < PROM_NB; i++){
         ms5611_c[i] = ms5611_prom(i);
+    }
+
 }
 static void ms5611_reset(void)
 {
@@ -132,37 +131,61 @@ static uint32_t ms5611_read_adc(void)
     return value;
 }
 
-uint32_t _D1 = 0; 
-uint32_t _D2 = 0; 
+
+uint32_t _D1 = 0;
+uint32_t _D2 = 0;
+
+#define CALIBRATE_CYCLE 50
+uint8_t count_ms5611 = 0;
+int32_t temp_alt = 0;
+static uint8_t readStep = 0;
+
+int32_t altitude_filted = 0;
+uint8_t reset_ = 1;
 
 void ms5611_start()
 {
+
     switch (readStep){
     case 0:
         send_cmd(CMD_ADC_CONV + CMD_ADC_D2 + CMD_ADC_256);
         _D1 = _D2 = 0;
+
         readStep ++;
         break;
     case 1:
         _D2 = ms5611_read_adc();
         send_cmd(CMD_ADC_CONV + CMD_ADC_D1 + CMD_ADC_256);
+
         readStep ++;
         break;
     case 2:
         _D1 = ms5611_read_adc();
-        if (_D1 == 0 || _D2 == 0) { 
+        if (_D1 == 0 || _D2 == 0) {
         	readStep = 0;
              break;
 
         }else{
             ms_5611_readout();
+            if(count_ms5611 < CALIBRATE_CYCLE){
+            	temp_alt += ms5611_altitude;
+            	ms5611_altitude = 0;
+            }else{
+            	altitude_offset = temp_alt/CALIBRATE_CYCLE;
+            	count_ms5611 = CALIBRATE_CYCLE;
+            	ms5611_altitude -= altitude_offset;
+            	if(reset_){
+            		altitude_filted = ms5611_altitude;
+            		reset_ = 0;
+            	}
+            	altitude_filted += 0.1*(ms5611_altitude - altitude_filted);
+            }
+            count_ms5611 ++;
+            readStep = 0;
         }
-        readStep = 0;
         break;
     }
-
 }
-
 
 
 static void ms_5611_readout()
@@ -214,25 +237,8 @@ static void ms_5611_readout()
 	// Convert temperature to Celcius
 	TEMP = temp * 0.01f;
     // press
-	static int8_t pr_start = 1;
-	 if(pr_start){
-	   ms5611_pressure = pressure;
-		 pr_start = 0;
-	 }
-	 else{
-       ms5611_pressure = 0.7*ms5611_pressure + 0.3* pressure;
-	 }
-    ms5611_altitude =  44330.0f* (1. - pow(ms5611_pressure/ (float)_SEALEVELPRESS, 0.19029495))*100; // cm
+    ms5611_altitude =  44330.0f* (1. - pow(pressure/ (float)_SEALEVELPRESS, 0.19029495))*100; // cm
+
 
 }
 
-static float ms5611_getSeaLevel(double altitude)
-{	
-	if (ms5611_pressure == 0) {
-		return -1;
-	}
-	
-   // seaLevelPress = press / pow((1.0 - (altitude / 44330.0)), 5.255);
-	
-	return seaLevelPress;
-}

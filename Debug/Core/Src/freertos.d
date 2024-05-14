@@ -47,19 +47,21 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Core/Inc/usart.h ../Core/Inc/main.h ../Core/Inc/tim.h \
  ../Core/Inc/i2c.h ../Core/Src/../Lib/timer.h ../Core/Src/../Lib/gps.h \
  ../Core/Src/../Lib/imu.h ../Core/Src/../Lib/axis.h \
- ../Core/Src/../Lib/sensordetect.h ../Core/Src/../Driver/ibus.h \
- ../Core/Src/../Driver/mpu6050.h ../Core/Src/../Driver/../Lib/axis.h \
- ../Core/Src/../Driver/interrupt.h ../Core/Src/../Driver/ibus.h \
- ../Core/Src/../Driver/../Lib/gps.h ../Core/Src/../Lib/compass.h \
- ../Core/Src/../Lib/pwm.h ../Core/Src/../flight/plane.h \
- ../Core/Src/../Lib/maths.h ../Core/Src/../Lib/blackbox.h \
- ../FATFS/App/fatfs.h ../Middlewares/Third_Party/FatFs/src/ff.h \
+ ../Core/Src/../Lib/sensordetect.h ../Core/Src/../Lib/compass.h \
+ ../Core/Src/../Lib/pwm.h ../Core/Src/../Lib/maths.h \
+ ../Core/Src/../Lib/blackbox.h ../FATFS/App/fatfs.h \
+ ../Middlewares/Third_Party/FatFs/src/ff.h \
  ../Middlewares/Third_Party/FatFs/src/integer.h ../FATFS/Target/ffconf.h \
  ../FATFS/Target/bsp_driver_sd.h \
  ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h \
  ../Middlewares/Third_Party/FatFs/src/diskio.h \
  ../Middlewares/Third_Party/FatFs/src/ff.h \
- ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h
+ ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h \
+ ../Core/Src/../Driver/ibus.h ../Core/Src/../Driver/mpu6050.h \
+ ../Core/Src/../Driver/../Lib/axis.h ../Core/Src/../Driver/interrupt.h \
+ ../Core/Src/../Driver/ibus.h ../Core/Src/../Driver/../Lib/gps.h \
+ ../Core/Src/../Driver/../flight/plane.h ../Core/Src/../Driver/ms5611.h \
+ ../Core/Src/../flight/plane.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -115,15 +117,8 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Src/../Lib/imu.h:
 ../Core/Src/../Lib/axis.h:
 ../Core/Src/../Lib/sensordetect.h:
-../Core/Src/../Driver/ibus.h:
-../Core/Src/../Driver/mpu6050.h:
-../Core/Src/../Driver/../Lib/axis.h:
-../Core/Src/../Driver/interrupt.h:
-../Core/Src/../Driver/ibus.h:
-../Core/Src/../Driver/../Lib/gps.h:
 ../Core/Src/../Lib/compass.h:
 ../Core/Src/../Lib/pwm.h:
-../Core/Src/../flight/plane.h:
 ../Core/Src/../Lib/maths.h:
 ../Core/Src/../Lib/blackbox.h:
 ../FATFS/App/fatfs.h:
@@ -135,3 +130,12 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Middlewares/Third_Party/FatFs/src/diskio.h:
 ../Middlewares/Third_Party/FatFs/src/ff.h:
 ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h:
+../Core/Src/../Driver/ibus.h:
+../Core/Src/../Driver/mpu6050.h:
+../Core/Src/../Driver/../Lib/axis.h:
+../Core/Src/../Driver/interrupt.h:
+../Core/Src/../Driver/ibus.h:
+../Core/Src/../Driver/../Lib/gps.h:
+../Core/Src/../Driver/../flight/plane.h:
+../Core/Src/../Driver/ms5611.h:
+../Core/Src/../flight/plane.h:

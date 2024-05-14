@@ -24,10 +24,13 @@ enum index{
 	CH7,
 	CH8,
 	CH9,
-	CH10
+	CH10,
+	CH11, // for RSSI
+	CH12,
+	CH13
 };
 #define CHANNEL_HIGH 1700
-#define IBUS_MAX_CHANNEL 10
+#define IBUS_MAX_CHANNEL 14
 extern uint32_t ibusChannelData[IBUS_MAX_CHANNEL];
 
 void ibus_run();

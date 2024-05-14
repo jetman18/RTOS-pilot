@@ -84,7 +84,7 @@ static inline uint16_t mavlink_msg_distance_sensor_pack(uint8_t system_id, uint8
 
 	msg->msgid = MAVLINK_MSG_ID_DISTANCE_SENSOR;
 #if MAVLINK_CRC_EXTRA
-    return 0;//sagmavlink_finalize_mese(msg, system_id, component_id, MAVLINK_MSG_ID_DISTANCE_SENSOR_LEN, MAVLINK_MSG_ID_DISTANCE_SENSOR_CRC);
+    return mavlink_finalize_message(msg, system_id, component_id, MAVLINK_MSG_ID_DISTANCE_SENSOR_LEN, MAVLINK_MSG_ID_DISTANCE_SENSOR_CRC);
 #else
     return mavlink_finalize_message(msg, system_id, component_id, MAVLINK_MSG_ID_DISTANCE_SENSOR_LEN);
 #endif

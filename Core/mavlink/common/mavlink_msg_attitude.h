@@ -63,7 +63,7 @@ static inline uint16_t mavlink_msg_attitude_pack(uint8_t system_id, uint8_t comp
 	_mav_put_float(buf, 20, pitchspeed);
 	_mav_put_float(buf, 24, yawspeed);
 
-    	memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_ATTITUDE_LEN);
+        memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_ATTITUDE_LEN);
 #else
 	mavlink_attitude_t packet;
 	packet.time_boot_ms = time_boot_ms;

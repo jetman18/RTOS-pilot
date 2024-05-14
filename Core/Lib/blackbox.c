@@ -6,7 +6,7 @@
 #include "math.h"
 #include <stdlib.h>
 
-#define MAX_BUFFER_SIZE 200
+#define MAX_BUFFER_SIZE 512
 
 typedef struct{
    int indexx;

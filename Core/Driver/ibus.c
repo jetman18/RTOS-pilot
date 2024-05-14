@@ -123,7 +123,10 @@ int ibusFrameComplete(void)
             ibusChannelData[7] = (ibus[17] << 8) + ibus[16];
 			ibusChannelData[8] = (ibus[19] << 8) + ibus[18];
             ibusChannelData[9] = (ibus[21] << 8) + ibus[20];
-			
+            ibusChannelData[10] = (ibus[23] << 8) + ibus[22];
+			ibusChannelData[11] = (ibus[25] << 8) + ibus[24];
+			ibusChannelData[12] = (ibus[27] << 8) + ibus[26];
+			ibusChannelData[13] = (ibus[29] << 8) + ibus[28];
 			for(int i =0; i< IBUS_MAX_CHANNEL ;i++){
 			    if(ibusChannelData[i] > 2100){
 				    ibusChannelData[i] = 1000;

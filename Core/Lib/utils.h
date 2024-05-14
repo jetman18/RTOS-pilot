@@ -23,4 +23,8 @@ static float range180(float val){
 
 #define Feq2Sec(F) (1.0f/F)
 
+static int32_t mapI(int val, int min_in,int max_in,int min_out, int max_out){
+   int out = (val - min_in)*(max_out - min_out)/(max_in - min_in);
+}
+
 #endif
