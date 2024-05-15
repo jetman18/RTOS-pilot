@@ -20,6 +20,7 @@ float integralFBx;
 float integralFBy;
 float integralFBz;
 float acc_Eframe[3];
+int16_t acc_Bframe[3];
 
 const float Ki_imu = 0;
 float Kp_imu = 0.2;
@@ -79,7 +80,7 @@ void get_Acc_Angle(euler_t *m)
 	m->roll   = atan2_approx(-acc.x, (1/invSqrt_(acc.y * acc.y + acc.z * acc.z)))*180/M_PIf;
 }
 
-static int8_t first_loop = 1;
+static int8_t reset_state = 1;
 // mahony filter
 void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t accy_, int16_t accz_,int16_t magx,int16_t magy,int16_t magz,float dt){
 	float norm;
@@ -100,11 +101,11 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
 		acc_y = (float)accy_ * norm;
 		acc_z = (float)accz_ * norm;
 
-		if(first_loop){
+		if(reset_state){
 			dcm[0][2] = acc_x;
 			dcm[1][2] = acc_y;
 			dcm[2][2] = acc_z;
-			first_loop = 0;
+			reset_state = 0;
 		}
 
         if(USE_MAG){
@@ -190,42 +191,14 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
 	dcm[2][2] = 2.0f*(0.5f - q1q1 - q2q2);
 	
     // Rotate acceleration from Body frame to earth frame
-    /*
-	acc_Eframe[X] = dcm[0][0]*acc_Bframe[X] + dcm[1][0]*acc_Bframe[Y] + dcm[2][0]*acc_Bframe[Z];
-	acc_Eframe[Y] = dcm[0][1]*acc_Bframe[X] + dcm[1][1]*acc_Bframe[Y] + dcm[2][1]*acc_Bframe[Z];
-	acc_Eframe[Z] = dcm[0][2]*acc_Bframe[X] + dcm[1][2]*acc_Bframe[Y] + dcm[2][2]*acc_Bframe[Z];
-	const float accTrueScale = 9.8f/2048.0f;
-	acc_Eframe[X] = acc_Eframe[X]*accTrueScale;
-	acc_Eframe[Y] = acc_Eframe[Y]*accTrueScale;
-	acc_Eframe[Z] = acc_Eframe[Z]*accTrueScale;
-    */
-    // Dcm to euler angle in rad
-	//float pitch_rad = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]));
-	//float roll_rad = -atan2_approx(-dcm[1][2],dcm[2][2]);
-	//float yaw_rad = -atan2_approx(dcm[0][1],dcm[0][0]);
-	//if(yaw_rad < 0){
-	//   yaw_rad = 360*RAD + yaw_rad;
-//	}
-	
-	/*
-	float cosx = cos_approx(roll_rad);
-	float sinx = sin_approx(roll_rad);
-	float cosy = cos_approx(pitch_rad);
-	float tany = tan_approx(pitch_rad);
+	int16_t acc_Eframex = dcm[0][0]*accx_ + dcm[1][0]*accy_ + dcm[2][0]*accz_;
+	int16_t acc_Eframey = dcm[0][1]*accx_ + dcm[1][1]*accy_ + dcm[2][1]*accz_;
+	int16_t acc_Eframez = dcm[0][2]*accx_ + dcm[1][2]*accy_ + dcm[2][2]*accz_;
 
-	cosx = cos_approx(roll_rad);
-    cosy = cos_approx(pitch_rad);
-    cosz = cos_approx(yaw_rad);
-    sinx = sin_approx(roll_rad);
-    siny = sin_approx(pitch_rad);
-    sinz = sin_approx(yaw_rad);
-    tany = tan_approx(pitch_rad);
-	
-	// Body rate to euler rate (Deg/s)
-    AHRS.roll_rate  = (P + R*cosx*tany + Q*sinx*tany)*DEG;
-    AHRS.pitch_rate = (Q*cosx - R*sinx)*DEG;
-    AHRS.yaw_rate   = (R*cosx/cosy + Q*sinx/cosy)*DEG;
-    */
+	const float accTrueScale = 9.8f/2048.0f;
+	acc_Eframe[X] = acc_Eframex*accTrueScale;
+	acc_Eframe[Y] = acc_Eframey*accTrueScale;
+	acc_Eframe[Z] = acc_Eframez*accTrueScale;
 
 	AHRS.pitch = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]))*DEG;
 	AHRS.roll = -atan2_approx(-dcm[1][2],dcm[2][2])*DEG;

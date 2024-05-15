@@ -2,6 +2,6 @@
 ../Core/Lib/utils.h:8:14:range360	16	static
 ../Core/Lib/utils.h:15:14:range180	16	static
 ../Core/Lib/utils.h:26:16:mapI	32	static
-../Core/Lib/imu.c:44:6:imu_calibrate	40	static
-../Core/Lib/imu.c:63:6:get_Acc_Angle	56	static
-../Core/Lib/imu.c:84:6:update_ahrs	160	static
+../Core/Lib/imu.c:45:6:imu_calibrate	40	static
+../Core/Lib/imu.c:64:6:get_Acc_Angle	56	static
+../Core/Lib/imu.c:85:6:update_ahrs	168	static

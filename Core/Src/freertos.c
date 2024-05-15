@@ -222,7 +222,6 @@ void ahrs_task(void const * argument)
 
 /* USER CODE BEGIN Header_blackbox */
 uint32_t write_time;
-FRESULT dm,dm2;
 extern float roll_desired;
 extern float pitch_desired;
 extern float ab_speed_filted;
@@ -236,7 +235,7 @@ void blackbox(void const * argument)
 {
   /* USER CODE BEGIN blackbox */
 
-	//vTaskSuspend(NULL);
+	vTaskSuspend(NULL);
 	black_box_init();
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 50;  // 25 ms
