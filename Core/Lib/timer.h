@@ -21,7 +21,7 @@ void timer_callback();
 void timer_calculate_boottime();
 void timer_start(TIM_HandleTypeDef *htimz);
 TIM_HandleTypeDef *timer_name();
-
+void delay_us(uint32_t us);
 #define micros() (_micros + (__HAL_TIM_GET_COUNTER(htimmz)))
 #define millis() (micros() / 1000)
 #define seconds() (micros()/1000000)

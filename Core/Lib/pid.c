@@ -19,7 +19,7 @@ void pid_init(pid_t  *pid_in,float kp, float ki, float kd, float f_cut_D, float 
   pid_in->init = 1;
 }
 
-float pid_calculate(pid_t *pid_in,float input, float setpoint,float dt){
+float pid_calculate(pid_t *pid_in,float input, float setpoint,float scaler,float dt){
    if(pid_in->init){
        pid_in->last_input = input;
        pid_in->init = 0;
@@ -27,7 +27,7 @@ float pid_calculate(pid_t *pid_in,float input, float setpoint,float dt){
    }
 
    float error = setpoint - input;
-   float output = error*pid_in->kp;
+   float output = error*pid_in->kp*scaler;
 
    if(pid_in->ki > 0){
       pid_in->i_term += error *pid_in->ki *dt;
@@ -42,7 +42,7 @@ float pid_calculate(pid_t *pid_in,float input, float setpoint,float dt){
         pid_in->last_input = input;
         delta /= dt;
         pid_in->D_filted += gain_lpf*(delta - pid_in->D_filted);
-        output -= pid_in->D_filted;
+        output -= pid_in->D_filted*scaler;
    }
    return output;
 }

@@ -3,10 +3,90 @@
 #include "../Lib/imu.h"
 #include "../Driver/ibus.h"
 #include "../Lib/maths.h"
+#include "../Driver/ms5611.h"
+
+/*
+#define dt 0.01f
+
+float climb_rate_esitmate;
+float altitude_estimate;
+float acc_estimate;
+
+float Q_acc = 0.001;
+float R_climb_measurement = 0.2f; 
+float R_alt_measurement = 0.2f; 
+
+float P[3][3];
+
+void kalman_init(){
+    climb_rate_esitmate = 0;
+    altitude_estimate = 0;
+    acc_estimate = 0;
+    ms5611_init(&hi2c2);
+}
+
+void kalman_altitude_estimate(){
+    // state estimate
+    altitude_estimate = altitude_estimate + climb_rate_esitmate*dt + 0.5*sq(dt)*acc_estimate;
+    climb_rate_esitmate = climb_rate_esitmate + dt*acc_estimate;
+    acc_estimate = acc_Eframe[Z];
+
+    // variance estimate
+    P[0][0] = P[0][0] + dt*(P[0][1] + P[1][1]*dt + (P[2][1]*sq(dt))/2) + P[1][0]*dt + (sq(dt)*(P[0][2] + P[1][2]*dt + (P[2][2]*sq(dt))/2))/2 + (P[2][0]*sq(dt))/2 + (Q_acc*sq(dt)^2)/4;
+    P[0][1] = P[0][1] + dt*(P[0][2] + P[1][2]*dt + (P[2][2]*sq(dt))/2) + P[1][1]*dt + (P[2][1]*sq(dt))/2 + (Q_acc*dt*sq(dt))/2;
+    P[0][2] = P[0][2] + P[1][2]*dt + (P[2][2]*sq(dt))/2 + (Q_acc*sq(dt))/2;
+
+    P[1][0] = P[1][0] + P[2][0]*dt + dt*(P[1][1] + P[2][1]*dt) + (sq(dt)*(P[1][2] + P[2][2]*dt))/2 + (Q_acc*dt*sq(dt))/2;
+    P[1][1] = P[1][1] + P[2][1]*dt + dt*(P[1][2] + P[2][2]*dt) + Q_acc*dt^2;
+    P[1][2] = P[1][2] + P[2][2]*dt +  Q_acc*dt;
+
+    P[2][0] = P[2][0] + P[2][1]*dt + (P[2][2]*sq(dt))/2 + (Q_acc*sq(dt))/2;
+    P[2][1] = P[2][1] + P[2][2]*dt + Q_acc*dt;
+    P[2][2] = P[2][2] + Q_acc;
+
+    // correction
+    float K1 =  P[0][0];
+}
+
+*/
+
+extern float acc_Eframe[];
+float vn,ve,vd;
+float pn,pe,pd;
+int8_t reset_state = 1;
+
+extern float bmp280_altitude_;
+extern float climb_rate_baro;
+void position_estimate(float dt){
+	if(reset_state){
+		vn = 0;
+		ve = 0;
+		vd = 0;
+		pn = 0;
+		pe = 0;
+		pd = 0;
+		reset_state = 0;
+	}
+	//pn += vn*dt + 0.5*sq(dt)*acc_Eframe[X];
+	//pe += ve*dt + 0.5*sq(dt)*acc_Eframe[Y];
+	pd += vd*dt + 0.5*sq(dt)*acc_Eframe[Z];
+
+	pd = pd*0.95f + 0.05*(bmp280_altitude_/10.0);
+    pe = pd*10;
+
+	//vn += dt*acc_Eframe[X];
+	//ve += dt*acc_Eframe[Y];
+	vd += dt*acc_Eframe[Z];
+	vd = vd * 0.9f + 0.1f*(climb_rate_baro/10.0);
+}
+
+
+
+
 
 static float gravity  = -9.81 ;
-static float toDeg = 57.29577;
-static float toRad = 0.01745;
+//static float toDeg = 57.29577;
+//static float toRad = 0.01745;
 static float Cd = 0.01;
 static float weigh = 0.8; // kg
 
@@ -18,15 +98,6 @@ float dynamic_speed_esitmate(float dt){
     velocity += acc*dt;
     return velocity;
 }
-
-
-
-
-
-
-
-
-
 
 
 /*
@@ -87,7 +158,7 @@ void estimates_start(){
         return;
     }
     // update thrust
-    thrust = ((float)ibusChannelData[CH3] - 1000)/1000*max_thrust;
+    thrust = ((float)ibusChannelDataCH3 - 1000)/1000*max_thrust;
 
     // alpha
     float v_horizon = sqrt(vel_estimate_North*vel_estimate_North + vel_estimate_East*vel_estimate_East);

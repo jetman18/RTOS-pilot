@@ -7,5 +7,5 @@
 ../Core/Driver/ms5611.c:109:16:ms5611_read_crc	16	static
 ../Core/Driver/ms5611.c:115:15:ms5611_check_crc	24	static
 ../Core/Driver/ms5611.c:123:17:ms5611_read_adc	24	static
-../Core/Driver/ms5611.c:146:6:ms5611_start	16	static
-../Core/Driver/ms5611.c:191:13:ms_5611_readout	72	static
+../Core/Driver/ms5611.c:190:6:ms5611_start	8	static
+../Core/Driver/ms5611.c:207:13:ms_5611_readout	72	static

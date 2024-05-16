@@ -44,6 +44,7 @@
 #include "../Driver/mpu6050.h"
 #include "../Driver/interrupt.h"
 #include "../Driver/ms5611.h"
+#include "../Driver/bmp280.h"
 
 #include "../flight/plane.h"
 
@@ -185,6 +186,7 @@ void ahrs_task(void const * argument)
 	attitude_ctrl_init();
 	initPWM(&htim3);
 	//ms5611_init(&hi2c2);
+	//bmp280_init(&hi2c2);
 	last_call = micros();
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 10; // 100 hz loop
@@ -200,18 +202,19 @@ void ahrs_task(void const * argument)
 		dt = 0;
 	//timer_calculate_boottime();
     //ms5611_start();
+    //bmp280_read_fixed(dt);
     ibusFrameComplete();
     update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],dt);
-    //attitude_ctrl(dt);
-	rate_stabilize(dt);
-/*
+    attitude_ctrl(dt);
+	//rate_stabilize(dt);
+
     if(ibusChannelData[CH5] < CHANNEL_HIGH ){
     	 vTaskSuspend(task2Handle);
     	 black_box_reset = TRUE;
     }else{
     	 vTaskResume(task2Handle);
     }
- */
+
     //vTaskSuspend(NULL);
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
     stack_task_ahrs = uxTaskGetStackHighWaterMark( NULL );
@@ -225,6 +228,9 @@ uint32_t write_time;
 extern float roll_desired;
 extern float pitch_desired;
 extern float ab_speed_filted;
+extern float v_estimate;
+extern int32_t climb_rate_baro;
+extern int32_t puts_state;
 /**
 * @brief Function implementing the task2 thread.
 * @param argument: Not used
@@ -235,8 +241,9 @@ void blackbox(void const * argument)
 {
   /* USER CODE BEGIN blackbox */
 
-	vTaskSuspend(NULL);
+	//vTaskSuspend(NULL);
 	black_box_init();
+	black_box_reset = TRUE;
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 50;  // 25 ms
 	xLastWakeTime = xTaskGetTickCount();
@@ -249,31 +256,34 @@ void blackbox(void const * argument)
     	black_box_pack_str("----new data-----\n");
     	black_box_reset = FALSE;
     }
+    int16_t vx = _gps.velocity[0];
+    int16_t vy = _gps.velocity[0];
+    int16_t vz = _gps.velocity[0];
+
+    int32_t v_g = sqrt(sq(vx) + sq(vy) + sq(vz)) ;
+    uint32_t time_ms =  millis();
+    black_box_pack_int(time_ms);
+    black_box_pack_char(' ');
+
 	black_box_pack_int((int)AHRS.roll*100);
 	black_box_pack_char(' ');
 	black_box_pack_int((int)roll_desired*100);
 	black_box_pack_char(' ');
-	black_box_pack_int((int)AHRS.pitch*100);
+	black_box_pack_int((int)AHRS.pitch*100);// cm
 	black_box_pack_char(' ');
 	black_box_pack_int((int)pitch_desired*100);
 	black_box_pack_char(' ');
-	black_box_pack_int((int)pitch_desired*100);
+	black_box_pack_int((int)v_estimate*100);
 	black_box_pack_char(' ');
-	black_box_pack_int((int)pitch_desired*100);
+	black_box_pack_int(v_g);
 	black_box_pack_char(' ');
-	black_box_pack_int((int)pitch_desired*100);
-	black_box_pack_char(' ');
-	black_box_pack_int((int)pitch_desired*100);
-	black_box_pack_char(' ');
-	black_box_pack_int((int)pitch_desired*100);
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(ab_speed_filted*10));
+	black_box_pack_int(_gps.fix);
 	black_box_pack_char('\n');
 	black_box_load();
 
 	write_time = micros() - current_time;
-	if(write_time > 10){
-	   HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	if(write_time > 10 && puts_state != -1){
+	   HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	}
 
 	vTaskDelayUntil( &xLastWakeTime, xFrequency);
@@ -311,7 +321,7 @@ void led_indicate(void const * argument)
 	}
 	*/
 	if(_gps.fix > 1){
-		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	}
 	stack_task_led = uxTaskGetStackHighWaterMark( NULL );
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
@@ -407,7 +417,6 @@ void mavlinkOSD(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	mavlink_osd();
 	//mavlink_send_heartbeat();
 	vTaskDelayUntil( &xLastWakeTime, xFrequency);

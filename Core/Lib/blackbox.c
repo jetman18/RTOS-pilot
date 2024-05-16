@@ -31,7 +31,8 @@ int32_t puts_state;
 void black_box_init(){
 	fs.file = &SDFile;
     mount_state = f_mount(&SDFatFS,"",1);
-    open_state = f_open(&SDFile,"DM.TXT", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+    open_state = f_open(&SDFile,"flight.TXT", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+    f_lseek (&SDFile,SDFile.fsize);
 }
 
 int black_box_pack(int param1, int  param2, int  param3,  int param4){

@@ -2,6 +2,7 @@
 ../Core/Lib/timer.c:9:17:setoverFlow	24	static
 ../Core/Lib/timer.c:20:6:timer_calculate_boottime	8	static
 ../Core/Lib/timer.c:28:6:timer_start	16	static
-../Core/Lib/timer.c:33:20:timer_name	4	static
-../Core/Lib/timer.c:37:6:resetCounter	4	static
-../Core/Lib/timer.c:40:6:timer_callback	4	static
+../Core/Lib/timer.c:33:6:delay_us	24	static
+../Core/Lib/timer.c:41:20:timer_name	4	static
+../Core/Lib/timer.c:45:6:resetCounter	4	static
+../Core/Lib/timer.c:48:6:timer_callback	4	static

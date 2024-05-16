@@ -15,6 +15,9 @@
 #define OFFSET_CYCLE  1000
 #define USE_MAG 1
 
+float velocity_test;
+float position_test;
+
 attitude_t AHRS;
 float integralFBx;
 float integralFBy;
@@ -31,7 +34,7 @@ static float dcm[3][3];
 float cosx,cosy,cosz,sinx,siny, sinz,tany;
 
 uint8_t isGyrocalibrated = FALSE;
-
+uint32_t init_us;
 
 //IMU configuration parameters
 imu_config_t config ={
@@ -57,6 +60,7 @@ void imu_calibrate(int16_t *offsx,int16_t *offsy,int16_t *offsz){
 	*offsx = store_gyro[X] / OFFSET_CYCLE;
 	*offsy = store_gyro[Y] / OFFSET_CYCLE;
 	*offsz = store_gyro[Z] / OFFSET_CYCLE;
+	init_us = millis();
 }
 
 /* Calculate euler angles from acceleration
@@ -194,11 +198,27 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
 	int16_t acc_Eframex = dcm[0][0]*accx_ + dcm[1][0]*accy_ + dcm[2][0]*accz_;
 	int16_t acc_Eframey = dcm[0][1]*accx_ + dcm[1][1]*accy_ + dcm[2][1]*accz_;
 	int16_t acc_Eframez = dcm[0][2]*accx_ + dcm[1][2]*accy_ + dcm[2][2]*accz_;
+	acc_Eframez -= 2000;
 
-	const float accTrueScale = 9.8f/2048.0f;
+
+	const float accTrueScale = 9.81f/2000.0f; // 2048
 	acc_Eframe[X] = acc_Eframex*accTrueScale;
 	acc_Eframe[Y] = acc_Eframey*accTrueScale;
 	acc_Eframe[Z] = acc_Eframez*accTrueScale;
+
+	acc_Eframe[X] = fapplyDeadband(acc_Eframe[X],0.02);
+	acc_Eframe[Y] = fapplyDeadband(acc_Eframe[Y],0.02);
+	acc_Eframe[Z] = fapplyDeadband(acc_Eframe[Z],0.02);
+
+    if(millis() - init_us < 5000){
+    	acc_Eframe[X] = 0;
+    	acc_Eframe[Y] = 0;
+    	acc_Eframe[Z] = 0;
+    }
+
+	//position_test += velocity_test*0.01f + 0.5* acc_Eframe[Z]* 0.01f * 0.01f;
+
+	//velocity_test += acc_Eframe[Z]*0.01f;
 
 	AHRS.pitch = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]))*DEG;
 	AHRS.roll = -atan2_approx(-dcm[1][2],dcm[2][2])*DEG;

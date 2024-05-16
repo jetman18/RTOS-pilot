@@ -30,6 +30,14 @@ void timer_start(TIM_HandleTypeDef *htimz){
 	HAL_TIM_Base_Start_IT(htimmz);
 }
 
+void delay_us(uint32_t us){
+     const uint32_t t_ = micros();
+     while ((int)(micros() - t_) < us)
+     {
+      /* code */
+     }
+}
+
 TIM_HandleTypeDef *timer_name(){
   return htimmz;
 }

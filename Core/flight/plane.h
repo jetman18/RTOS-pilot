@@ -32,6 +32,7 @@ void main_loop();
 //estimate 
 void estimates_start();
 float dynamic_speed_esitmate(float dt);
+void position_estimate(float dt);
 
 #ifdef __cplusplus
 }

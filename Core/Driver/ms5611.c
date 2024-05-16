@@ -142,7 +142,7 @@ static uint8_t readStep = 0;
 
 int32_t altitude_filted = 0;
 uint8_t reset_ = 1;
-
+/*
 void ms5611_start()
 {
 
@@ -186,7 +186,23 @@ void ms5611_start()
         break;
     }
 }
+*/
+void ms5611_start()
+{
+	_D1 = _D2 = 0;
+    send_cmd(CMD_ADC_CONV + CMD_ADC_D2 + CMD_ADC_256);
+    delay_us(500);
+    _D2 = ms5611_read_adc();
 
+    send_cmd(CMD_ADC_CONV + CMD_ADC_D1 + CMD_ADC_256);
+    delay_us(500);
+    _D1 = ms5611_read_adc();
+    if (_D1 == 0 || _D2 == 0)
+           return;
+    ms_5611_readout();
+
+}
+float kl;
 
 static void ms_5611_readout()
 {
@@ -213,6 +229,7 @@ static void ms_5611_readout()
 	temp=(2000.0f+(dT*(float)ms5611_c[6])/8388608.0f)+(float)_TOFFSET; // 20C + dT * TEMPSENS = 2000 + dT * C6 / 2^23
 	temp_ += 0.1*(temp - temp_);
     temp = temp_;
+
 	// Perform higher order corrections based on sensor used.
 	double T2=0., OFF2=0., SENS2=0.;
 	if(temp<2000) {
@@ -237,8 +254,9 @@ static void ms_5611_readout()
 	// Convert temperature to Celcius
 	TEMP = temp * 0.01f;
     // press
-    ms5611_altitude =  44330.0f* (1. - pow(pressure/ (float)_SEALEVELPRESS, 0.19029495))*100; // cm
-
+    //ms5611_altitude =  44330.0f* (1. - pow(pressure/ (float)_SEALEVELPRESS, 0.19029495))*100; // cm
+	ms5611_altitude =((44330 * (1.0 - powf((float)pressure/102416,0.1903))))*10 - 1180;
+	kl+= 0.1*(ms5611_altitude - kl);
 
 }
 
