@@ -31,24 +31,12 @@ int32_t puts_state;
 void black_box_init(){
 	fs.file = &SDFile;
     mount_state = f_mount(&SDFatFS,"",1);
-    open_state = f_open(&SDFile,"flight.TXT", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+    open_state = f_open(&SDFile,"flight.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
     f_lseek (&SDFile,SDFile.fsize);
 }
 
-int black_box_pack(int param1, int  param2, int  param3,  int param4){
-	black_box_pack_int(param1);
-	black_box_pack_char(' ');
-	black_box_pack_int(param2);
-	black_box_pack_char(' ');
-	black_box_pack_int(param3);
-	black_box_pack_char(' ');
-	black_box_pack_int(param4);
-	black_box_pack_char('\n');
-	if(fs.buffer_index >= 2000){
-		fs.buffer_index = 0;
-		return 1;
-	}
-	return 0;
+uint32_t black_box_get_file_size(){
+    return SDFile.fsize;
 }
 
 void black_box_pack_float(float val,uint8_t digit_after_point ){

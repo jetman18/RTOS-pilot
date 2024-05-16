@@ -16,6 +16,7 @@ void black_box_pack_char(char c);
 void black_box_load();
 void black_box_sync();
 void black_box_close();
+uint32_t black_box_get_file_size();
 int black_box_read(char *file_name, char *bufferr,uint8_t len);
 int black_box_pack(int param1, int  param2, int  param3,  int param4);
 

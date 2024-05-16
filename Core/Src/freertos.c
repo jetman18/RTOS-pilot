@@ -231,6 +231,8 @@ extern float ab_speed_filted;
 extern float v_estimate;
 extern int32_t climb_rate_baro;
 extern int32_t puts_state;
+extern uint16_t servoL,servoR;
+uint32_t sdcard_fsize;
 /**
 * @brief Function implementing the task2 thread.
 * @param argument: Not used
@@ -250,21 +252,39 @@ void blackbox(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-
+	static uint32_t start_time_ms;
 	uint32_t current_time = micros();
     if(black_box_reset){
-    	black_box_pack_str("----new data-----\n");
+    	black_box_pack_str("----------------------------new data--------------------------------\n");
     	black_box_reset = FALSE;
+    	start_time_ms = millis();
     }
-    int16_t vx = _gps.velocity[0];
-    int16_t vy = _gps.velocity[0];
-    int16_t vz = _gps.velocity[0];
 
-    int32_t v_g = sqrt(sq(vx) + sq(vy) + sq(vz)) ;
-    uint32_t time_ms =  millis();
+
+    uint32_t time_ms =  millis() - start_time_ms;
+
+	// control thortle 0 -> 100%
+	int throtle = ((int)ibusChannelData[CH3] - 1000)*0.1;
+
+	// tx signal 0 -> 100 %
+	int srri = ((int)ibusChannelData[CH11] - 1000)*0.1;
+
+	/*** write time  ***/
     black_box_pack_int(time_ms);
     black_box_pack_char(' ');
 
+	/*---- control parameters ---*/
+	black_box_pack_int((int)servoL);
+    black_box_pack_char(' ');
+	black_box_pack_int((int)servoR);
+    black_box_pack_char(' ');
+	black_box_pack_int(throtle);
+    black_box_pack_char(' ');
+	black_box_pack_int(srri);
+    black_box_pack_char(' ');
+
+
+	/*----- atitude ---------------------*/
 	black_box_pack_int((int)AHRS.roll*100);
 	black_box_pack_char(' ');
 	black_box_pack_int((int)roll_desired*100);
@@ -275,9 +295,27 @@ void blackbox(void const * argument)
 	black_box_pack_char(' ');
 	black_box_pack_int((int)v_estimate*100);
 	black_box_pack_char(' ');
-	black_box_pack_int(v_g);
+
+	/*------- GPS ----------------------*/
+	int16_t vx = _gps.velocity[0];  // cm/s
+    int16_t vy = _gps.velocity[1];  // cm/s
+    int16_t vz = _gps.velocity[2];  // cm/s
+    int32_t ground_speed = sqrt(sq(vx) + sq(vy) + sq(vz)) ;
+
+	black_box_pack_int(_gps.position[0]);
+	black_box_pack_char(' ');
+	black_box_pack_int(_gps.position[1]);
+	black_box_pack_char(' ');
+	black_box_pack_int(_gps.altitude_msl);
+	black_box_pack_char(' ');
+	black_box_pack_int(_gps.numSat);
 	black_box_pack_char(' ');
 	black_box_pack_int(_gps.fix);
+	black_box_pack_char(' ');
+	black_box_pack_int(ground_speed);
+
+	/*----- end line && load data to sd card- -----*/
+	sdcard_fsize = black_box_get_file_size();
 	black_box_pack_char('\n');
 	black_box_load();
 

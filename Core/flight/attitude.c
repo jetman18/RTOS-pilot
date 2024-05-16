@@ -8,7 +8,6 @@
 #include "../Lib/gps.h"
 #include "../Lib/filter.h"
 
-
 #define LOOP_TIM 0.01f  // Seconds
 #define SERVO_MAX_PWM 2000
 #define SERVO_MIN_PWM 1000
@@ -45,6 +44,7 @@ float pitch_trim;
 float ab_speed_filted;
 
 float v_estimate;
+uint16_t servoL,servoR;
 
 void attitude_ctrl_init(){
 
@@ -67,7 +67,6 @@ void attitude_ctrl(float dt){
     if(dt < 0 || dt > MAX_WAIT_TIME){
         return;
     }
-    uint16_t servoL,servoR;
 
     float roll_rate_measurement = AHRS.roll_rate;
     float pitch_rate_measurement = AHRS.pitch_rate;
