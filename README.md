@@ -31,16 +31,17 @@ Flight controller for fixed-wing uav
 <img  src="./images/fpvv.jpg" alt="img-name" width="700" height="500"> 
 
 ## Manual fight data
-Flight trajectory 
+### Flight trajectory 
+
 <img  src="./images/flight_trajectory.jpg" alt="img-name" width="400" height="330"> 
 
-Altitude baro vs gps
+### Altitude baro vs gps
 <img  src="./images/alt_baro_vs_gps.jpg" alt="img-name" width="700" height="330"> 
 
-Roll && pitch angle
+### Roll && pitch angle
 <img  src="./images/roll_pitch_data.jpg" alt="img-name" width="700" height="330"> 
 
-Ground speed from gps
+### Ground speed from gps
 <img  src="./images/g_speed.jpg" alt="img-name" width="700" height="330"> 
 
 
