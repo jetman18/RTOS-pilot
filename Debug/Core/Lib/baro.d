@@ -1,6 +1,4 @@
-Core/flight/estimate.o: ../Core/flight/estimate.c \
- ../Core/flight/../Lib/maths.h ../Core/flight/../Lib/utils.h \
- ../Core/flight/../Lib/imu.h \
+Core/Lib/baro.o: ../Core/Lib/baro.c ../Core/Lib/baro.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
@@ -29,12 +27,10 @@ Core/flight/estimate.o: ../Core/flight/estimate.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/flight/../Lib/axis.h ../Core/flight/../Lib/gps.h \
- ../Core/flight/../Driver/ibus.h ../Core/flight/../Driver/ms5611.h \
- ../Core/Inc/i2c.h ../Core/Inc/main.h
-../Core/flight/../Lib/maths.h:
-../Core/flight/../Lib/utils.h:
-../Core/flight/../Lib/imu.h:
+ ../Core/Lib/../Driver/ibus.h ../Core/Lib/../Driver/ms5611.h \
+ ../Core/Inc/i2c.h ../Core/Inc/main.h ../Core/Lib/../Driver/bmp280.h \
+ ../Core/Lib/../Lib/maths.h
+../Core/Lib/baro.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h:
@@ -63,9 +59,9 @@ Core/flight/estimate.o: ../Core/flight/estimate.c \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
-../Core/flight/../Lib/axis.h:
-../Core/flight/../Lib/gps.h:
-../Core/flight/../Driver/ibus.h:
-../Core/flight/../Driver/ms5611.h:
+../Core/Lib/../Driver/ibus.h:
+../Core/Lib/../Driver/ms5611.h:
 ../Core/Inc/i2c.h:
 ../Core/Inc/main.h:
+../Core/Lib/../Driver/bmp280.h:
+../Core/Lib/../Lib/maths.h:

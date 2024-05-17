@@ -49,7 +49,7 @@ typedef struct{
 extern attitude_t AHRS;
 void imu_update_ahrs();
 void imu_calibrate(int16_t *offsx,int16_t *offsy,int16_t *offsz);
-void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t accy_, int16_t accz_,int16_t magx,int16_t magy,int16_t magz,float dt);
+void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t accy_, int16_t accz_,int16_t magx,int16_t magy,int16_t magz,uint32_t micros);
 void euler_from_dcm(float *roll, float *pitch, float *yaw);
 void get_Acc_Angle(euler_t *m);
 

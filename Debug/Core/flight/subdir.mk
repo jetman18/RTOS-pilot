@@ -5,25 +5,22 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Core/flight/attitude.c \
+../Core/flight/attitude_ctrl.c \
 ../Core/flight/estimate.c \
 ../Core/flight/mavlink_handler.c \
-../Core/flight/navigation.c \
-../Core/flight/plane.c 
+../Core/flight/navigation.c 
 
 OBJS += \
-./Core/flight/attitude.o \
+./Core/flight/attitude_ctrl.o \
 ./Core/flight/estimate.o \
 ./Core/flight/mavlink_handler.o \
-./Core/flight/navigation.o \
-./Core/flight/plane.o 
+./Core/flight/navigation.o 
 
 C_DEPS += \
-./Core/flight/attitude.d \
+./Core/flight/attitude_ctrl.d \
 ./Core/flight/estimate.d \
 ./Core/flight/mavlink_handler.d \
-./Core/flight/navigation.d \
-./Core/flight/plane.d 
+./Core/flight/navigation.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -33,7 +30,7 @@ Core/flight/%.o Core/flight/%.su Core/flight/%.cyclo: ../Core/flight/%.c Core/fl
 clean: clean-Core-2f-flight
 
 clean-Core-2f-flight:
-	-$(RM) ./Core/flight/attitude.cyclo ./Core/flight/attitude.d ./Core/flight/attitude.o ./Core/flight/attitude.su ./Core/flight/estimate.cyclo ./Core/flight/estimate.d ./Core/flight/estimate.o ./Core/flight/estimate.su ./Core/flight/mavlink_handler.cyclo ./Core/flight/mavlink_handler.d ./Core/flight/mavlink_handler.o ./Core/flight/mavlink_handler.su ./Core/flight/navigation.cyclo ./Core/flight/navigation.d ./Core/flight/navigation.o ./Core/flight/navigation.su ./Core/flight/plane.cyclo ./Core/flight/plane.d ./Core/flight/plane.o ./Core/flight/plane.su
+	-$(RM) ./Core/flight/attitude_ctrl.cyclo ./Core/flight/attitude_ctrl.d ./Core/flight/attitude_ctrl.o ./Core/flight/attitude_ctrl.su ./Core/flight/estimate.cyclo ./Core/flight/estimate.d ./Core/flight/estimate.o ./Core/flight/estimate.su ./Core/flight/mavlink_handler.cyclo ./Core/flight/mavlink_handler.d ./Core/flight/mavlink_handler.o ./Core/flight/mavlink_handler.su ./Core/flight/navigation.cyclo ./Core/flight/navigation.d ./Core/flight/navigation.o ./Core/flight/navigation.su
 
 .PHONY: clean-Core-2f-flight
 

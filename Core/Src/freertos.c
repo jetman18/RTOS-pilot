@@ -38,6 +38,7 @@
 #include "../Lib/pwm.h"
 #include "../Lib/maths.h"
 #include "../Lib/blackbox.h"
+#include "../Lib/baro.h"
 
 
 #include "../Driver/ibus.h"
@@ -160,17 +161,17 @@ void MX_FREERTOS_Init(void) {
 }
 
 /* USER CODE BEGIN Header_ahrs_task */
+/********** stack check ********/
 uint16_t stack_task_ahrs;
 uint16_t stack_task_led;
 uint16_t stack_task_sensor;
 uint16_t stack_task_mavOSD;
 uint16_t stack_task_blackbox;
-
-
+/***************************/
+int32_t alt_baro;
 int16_t gyro_imu[3];
 int16_t acc_imu[3];
 int16_t mag_raw[3];
-uint32_t last_call;
 uint8_t black_box_reset;
 /**
   * @brief  Function implementing the task1 thread.
@@ -185,9 +186,7 @@ void ahrs_task(void const * argument)
 	gps_init(&huart3,57600);
 	attitude_ctrl_init();
 	initPWM(&htim3);
-	//ms5611_init(&hi2c2);
-	//bmp280_init(&hi2c2);
-	last_call = micros();
+    baro_init();
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 10; // 100 hz loop
 	xLastWakeTime = xTaskGetTickCount();
@@ -195,18 +194,22 @@ void ahrs_task(void const * argument)
   for(;;)
   {
 	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4); // for debug
-
-    float dt = (micros() - last_call)*(1e-6f);
-    last_call = micros();
-    if(dt < 0)
-		dt = 0;
 	//timer_calculate_boottime();
-    //ms5611_start();
-    //bmp280_read_fixed(dt);
+    if(is_baro_calibration() == FALSE){
+		baro_zero_calibrate();
+	}
+    alt_baro = baro_get_altitude();
     ibusFrameComplete();
-    update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],dt);
-    attitude_ctrl(dt);
-	//rate_stabilize(dt);
+    update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],micros());
+    attitude_ctrl(micros());
+
+    /*** Altitude estimate ****/
+    static int8_t count_ = 0;
+	if(count_ >= 9){
+		altitude_estimate(0.1);
+		count_ = 0;
+	}
+	count_ ++;
 
     if(ibusChannelData[CH5] < CHANNEL_HIGH ){
     	 vTaskSuspend(task2Handle);
@@ -233,6 +236,7 @@ extern int32_t climb_rate_baro;
 extern int32_t puts_state;
 extern uint16_t servoL,servoR;
 uint32_t sdcard_fsize;
+extern float alt_estimate,climb_rate;
 /**
 * @brief Function implementing the task2 thread.
 * @param argument: Not used
@@ -255,12 +259,10 @@ void blackbox(void const * argument)
 	static uint32_t start_time_ms;
 	uint32_t current_time = micros();
     if(black_box_reset){
-    	black_box_pack_str("----------------------------new data--------------------------------\n");
+    	black_box_pack_str("----------------------------new data----------------------------------------------------------------\n");
     	black_box_reset = FALSE;
     	start_time_ms = millis();
     }
-
-
     uint32_t time_ms =  millis() - start_time_ms;
 
 	// control thortle 0 -> 100%
@@ -285,15 +287,15 @@ void blackbox(void const * argument)
 
 
 	/*----- atitude ---------------------*/
-	black_box_pack_int((int)AHRS.roll*100);
+	black_box_pack_int((int)(AHRS.roll*100));
 	black_box_pack_char(' ');
-	black_box_pack_int((int)roll_desired*100);
+	black_box_pack_int((int)(roll_desired*100));
 	black_box_pack_char(' ');
-	black_box_pack_int((int)AHRS.pitch*100);// cm
+	black_box_pack_int((int)(AHRS.pitch*100));// cm
 	black_box_pack_char(' ');
-	black_box_pack_int((int)pitch_desired*100);
+	black_box_pack_int((int)(pitch_desired*100));
 	black_box_pack_char(' ');
-	black_box_pack_int((int)v_estimate*100);
+	black_box_pack_int((int)(v_estimate*100));
 	black_box_pack_char(' ');
 
 	/*------- GPS ----------------------*/
@@ -313,6 +315,16 @@ void blackbox(void const * argument)
 	black_box_pack_int(_gps.fix);
 	black_box_pack_char(' ');
 	black_box_pack_int(ground_speed);
+	black_box_pack_char(' ');
+	black_box_pack_int(vz);
+
+	/*---- estimate ---------------------------*/
+	black_box_pack_char(' ');
+	black_box_pack_int((int)(alt_estimate*100)); //cm
+	black_box_pack_char(' '); 
+	black_box_pack_int((int)(climb_rate*100));   // cm/s
+	black_box_pack_char(' '); 
+	black_box_pack_int(alt_baro);   // cm
 
 	/*----- end line && load data to sd card- -----*/
 	sdcard_fsize = black_box_get_file_size();

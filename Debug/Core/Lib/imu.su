@@ -4,4 +4,4 @@
 ../Core/Lib/utils.h:26:16:mapI	32	static
 ../Core/Lib/imu.c:48:6:imu_calibrate	40	static
 ../Core/Lib/imu.c:68:6:get_Acc_Angle	56	static
-../Core/Lib/imu.c:89:6:update_ahrs	168	static
+../Core/Lib/imu.c:89:6:update_ahrs	176	static

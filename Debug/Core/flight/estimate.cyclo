@@ -2,5 +2,5 @@
 ../Core/flight/../Lib/utils.h:8:14:range360	3
 ../Core/flight/../Lib/utils.h:15:14:range180	3
 ../Core/flight/../Lib/utils.h:26:16:mapI	1
-../Core/flight/estimate.c:60:6:position_estimate	2
-../Core/flight/estimate.c:95:7:dynamic_speed_esitmate	2
+../Core/flight/estimate.c:13:6:altitude_estimate	2
+../Core/flight/estimate.c:39:7:dynamic_speed_esitmate	2

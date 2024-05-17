@@ -146,7 +146,7 @@ bool bmp280_init(I2C_HandleTypeDef* i2c);
  *  Humidity is optional and only read for the BME280, in percent relative
  *  humidity as a fixed point 22 bit interger and 10 bit fraction format.
  */
-bool bmp280_read_fixed(float dt);
+int32_t bmp280_read_fixed();
 
 /**
  * Read compensated temperature and pressure data:

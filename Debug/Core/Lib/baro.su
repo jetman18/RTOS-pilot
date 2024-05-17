@@ -1,0 +1,5 @@
+../Core/Lib/../Lib/maths.h:163:12:constrain	24	static
+../Core/Lib/baro.c:13:6:baro_init	16	static
+../Core/Lib/baro.c:28:6:baro_zero_calibrate	16	static
+../Core/Lib/baro.c:45:8:is_baro_calibration	4	static
+../Core/Lib/baro.c:49:9:baro_get_altitude	16	static

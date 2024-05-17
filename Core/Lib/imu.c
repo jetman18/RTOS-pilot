@@ -86,7 +86,7 @@ void get_Acc_Angle(euler_t *m)
 
 static int8_t reset_state = 1;
 // mahony filter
-void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t accy_, int16_t accz_,int16_t magx,int16_t magy,int16_t magz,float dt){
+void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t accy_, int16_t accz_,int16_t magx,int16_t magy,int16_t magz,uint32_t micros){
 	float norm;
 	float ex, ey, ez;
     float gx,gy,gz;
@@ -94,6 +94,10 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     float vx, vy, vz;
     float emz,wx,wy;
     float mx,my,mz,hx,hy,bx,bz;
+
+    static uint32_t last_time_us;
+    float dt = (micros - last_time_us)*(1e-6f);
+    last_time_us = micros;
 
 	gx = (gx_/config.gyr_lsb) * RAD;
 	gy = (gy_/config.gyr_lsb) * RAD;

@@ -57,9 +57,10 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Middlewares/Third_Party/FatFs/src/diskio.h \
  ../Middlewares/Third_Party/FatFs/src/ff.h \
  ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h \
- ../Core/Src/../Driver/ibus.h ../Core/Src/../Driver/mpu6050.h \
- ../Core/Src/../Driver/../Lib/axis.h ../Core/Src/../Driver/interrupt.h \
- ../Core/Src/../Driver/ibus.h ../Core/Src/../Driver/../Lib/gps.h \
+ ../Core/Src/../Lib/baro.h ../Core/Src/../Driver/ibus.h \
+ ../Core/Src/../Driver/mpu6050.h ../Core/Src/../Driver/../Lib/axis.h \
+ ../Core/Src/../Driver/interrupt.h ../Core/Src/../Driver/ibus.h \
+ ../Core/Src/../Driver/../Lib/gps.h \
  ../Core/Src/../Driver/../flight/plane.h ../Core/Src/../Driver/ms5611.h \
  ../Core/Src/../Driver/bmp280.h ../Core/Src/../flight/plane.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
@@ -130,6 +131,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Middlewares/Third_Party/FatFs/src/diskio.h:
 ../Middlewares/Third_Party/FatFs/src/ff.h:
 ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h:
+../Core/Src/../Lib/baro.h:
 ../Core/Src/../Driver/ibus.h:
 ../Core/Src/../Driver/mpu6050.h:
 ../Core/Src/../Driver/../Lib/axis.h:

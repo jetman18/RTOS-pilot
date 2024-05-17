@@ -28,10 +28,6 @@
 
 BMP280_HandleTypedef devv;
 
-float bmp280_altitude_;
-int alt_baro;
-float climb_rate_baro;
-
 void bmp280_init_default_params() {
 	devv.params.mode = BMP280_MODE_NORMAL;
 	devv.params.filter = BMP280_FILTER_16;
@@ -229,7 +225,7 @@ static  uint32_t compensate_pressure(int32_t adc_press,int32_t fine_temp) {
 }
 
 
-bool bmp280_read_fixed(float dt){
+int32_t bmp280_read_fixed(){
 	static int32_t adc_pressure;
 	static int32_t adc_temp;
 	static int32_t last_alt_baro;
@@ -250,16 +246,8 @@ bool bmp280_read_fixed(float dt){
 	adc_temp = data[0] << 12 | data[1] << 4 | data[2] >> 4;
     temperature = compensate_temperature(adc_temp, &fine_temp);
 	pressure = compensate_pressure(adc_pressure, fine_temp);
-
-	int32_t alt_temp =((44330 * (1.0 - powf((float)pressure/102416,0.1903))))*10 - 10234;
-	bmp280_altitude_ += 0.05*((float)alt_temp - bmp280_altitude_);
-	static uint32_t last_time = 0;
-	if(millis() - last_time > 500){
-	    climb_rate_baro = (bmp280_altitude_ - last_alt_baro)/0.5;
-	    last_alt_baro = bmp280_altitude_;
-	    last_time = millis();
-	}
-	return true;
+	int32_t bmp280_altitude =((44330 * (1.0 - powf((float)pressure/102416,0.1903))))*100 - 100000;// cm
+	return bmp280_altitude;
 }
 
 

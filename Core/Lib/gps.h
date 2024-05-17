@@ -18,7 +18,7 @@ typedef struct{
     
     uint32_t  posUpdateTime;
     uint32_t  timer_;
-    uint16_t  altitude_msl;
+    int32_t  altitude_msl;
     uint16_t  ground_course;
     uint8_t   numSat;
     uint8_t   fix;

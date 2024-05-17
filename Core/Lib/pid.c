@@ -4,9 +4,6 @@
 #include "timer.h"
 #include "string.h"
 
-#define usTosec(x)    (x *(1e-06f))
-#define MAX_WAIT_TIME 500000
-
 void pid_init(pid_t  *pid_in,float kp, float ki, float kd, float f_cut_D, float maxI){
   memset(pid_in,0,sizeof(pid_t));
   pid_in->kp = kp;
@@ -25,15 +22,17 @@ float pid_calculate(pid_t *pid_in,float input, float setpoint,float scaler,float
        pid_in->init = 0;
        return 0.0f;
    }
-
+   // Caculate P term
    float error = setpoint - input;
    float output = error*pid_in->kp*scaler;
 
+   // Caculate I term
    if(pid_in->ki > 0){
       pid_in->i_term += error *pid_in->ki *dt;
       pid_in->i_term = constrainf(pid_in->i_term,-pid_in->I_range,pid_in->I_range);
       output += pid_in->i_term;
    }
+   // Caculate D term
    if(pid_in->kd > 0){
         // low pass filter
         float RC = 1.0f / (2 *M_PIf *pid_in->f_cut_D);

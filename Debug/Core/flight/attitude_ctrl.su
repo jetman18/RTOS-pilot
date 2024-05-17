@@ -1,0 +1,6 @@
+../Core/flight/../Lib/maths.h:163:12:constrain	24	static
+../Core/flight/../Lib/maths.h:173:21:constrainf	24	static
+../Core/flight/../Lib/filter.h:13:21:pt1FilterGain	24	static
+../Core/flight/attitude_ctrl.c:55:6:attitude_ctrl_init	16	static
+../Core/flight/attitude_ctrl.c:72:6:attitude_ctrl	128	static
+../Core/flight/attitude_ctrl.c:205:6:rate_stabilize	80	static
