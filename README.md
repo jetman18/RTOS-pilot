@@ -30,10 +30,24 @@ Flight controller for fixed-wing uav
 ### Uav
 <img  src="./images/fpvv.jpg" alt="img-name" width="700" height="500"> 
 
+## Manual fight data
+Flight trajectory 
+<img  src="./images/flight_trajectory.jpg" alt="img-name" width="400" height="330"> 
+
+Altitude baro vs gps
+<img  src="./images/alt_baro_vs_gps.jpg" alt="img-name" width="700" height="330"> 
+
+Roll && pitch angle
+<img  src="./images/roll_pitch_data.jpg" alt="img-name" width="700" height="330"> 
+
+Ground speed from gps
+<img  src="./images/g_speed.jpg" alt="img-name" width="700" height="330"> 
+
+
 ## Attitude && PID controller
 
 ### Roll axis 
 
 [//]:<p align="center">
-<img src="./images/roll_ctr.jpg" width="800" height="350" />
+<img src="./images/roll_ctr.jpg" width="700" height="350" />
 </p>
