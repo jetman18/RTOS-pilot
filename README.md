@@ -1,15 +1,7 @@
 # RTOS-pilot
 
 Flight controller for fixed-wing uav
-
-<img align="center" src="./images/fcc.jpg" alt="img-name" width="600" height="400">
-
-### Configuration
-<img align="center" src="./images/datmach.jpg" alt="img-name" width="600" height="400">
-
-
 ## Hardware
-Flight controller
 - 3 uart
 - 1 I2C
 - 6 PWM output
@@ -20,6 +12,13 @@ Flight controller
 - ms-5611  baro
 - SD card 
 - 24HCxx Epprom ic
+
+<img align="center" src="./images/fcc.jpg" alt="img-name" width="600" height="400">
+
+### Configuration
+<img align="center" src="./images/datmach.jpg" alt="img-name" width="600" height="400">
+
+
 ### 3d pcb design
 
 
@@ -29,14 +28,12 @@ Flight controller
 <img  src="./images/fc1.jpg" alt="img-name" width="500" height="350">
 
 ### Uav
-<p align="center">
-<img  src="./images/fpvv.jpg" alt="img-name" width="800" height="500"> 
-</p>
+<img  src="./images/fpvv.jpg" alt="img-name" width="700" height="500"> 
 
 ## Attitude && PID controller
 
 ### Roll axis 
 
-<p align="center">
+[//]:<p align="center">
 <img src="./images/roll_ctr.jpg" width="800" height="350" />
 </p>
