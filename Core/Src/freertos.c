@@ -285,7 +285,6 @@ void blackbox(void const * argument)
 	black_box_pack_int(srri);
     black_box_pack_char(' ');
 
-
 	/*----- atitude ---------------------*/
 	black_box_pack_int((int)(AHRS.roll*100));
 	black_box_pack_char(' ');
@@ -295,14 +294,16 @@ void blackbox(void const * argument)
 	black_box_pack_char(' ');
 	black_box_pack_int((int)(pitch_desired*100));
 	black_box_pack_char(' ');
-	black_box_pack_int((int)(v_estimate*100));
+	black_box_pack_int((int)(AHRS.yaw*100));
+	black_box_pack_char(' ');
+	black_box_pack_int((int)(AHRS.yaw_rate*100));
 	black_box_pack_char(' ');
 
 	/*------- GPS ----------------------*/
 	int16_t vx = _gps.velocity[0];  // cm/s
     int16_t vy = _gps.velocity[1];  // cm/s
     int16_t vz = _gps.velocity[2];  // cm/s
-    int32_t ground_speed = sqrt(sq(vx) + sq(vy) + sq(vz)) ;
+    int32_t ground_speed = sqrt(sq(vx) + sq(vy)) ;
 
 	black_box_pack_int(_gps.position[0]);
 	black_box_pack_char(' ');

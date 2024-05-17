@@ -77,15 +77,17 @@ void attitude_ctrl(uint32_t micros){
         return;
     }
 
-    float roll_rate_measurement = AHRS.roll_rate;
-    float pitch_rate_measurement = AHRS.pitch_rate;
+    const float roll_rate_measurement = AHRS.roll_rate;
+    const float pitch_rate_measurement = AHRS.pitch_rate;
 
-    float roll_measurement = AHRS.roll;
-    float pitch_measurement = AHRS.pitch;
+    const float roll_measurement = AHRS.roll;
+    const float pitch_measurement = AHRS.pitch;
 
     static float roll_pid_smooth = 0.0f;
     static float pitch_pid_smooth = 0.0f;
-
+    
+    /* calculate roll && pitch desired
+    */
     roll_desired = ((int)ibusChannelData[0] - 1500)*0.1f    + roll_trim;   /*  -50 <-  -> +50  */ 
 	pitch_desired = ((int)ibusChannelData[1] - 1500)*-0.15f + pitch_trim ;/*  -75 <-  -> +75  */ 
 
