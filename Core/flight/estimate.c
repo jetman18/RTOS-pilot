@@ -9,18 +9,36 @@
 
 extern float acc_Eframe[3];
 float alt_estimate,climb_rate;
-
+float velocity_abs;
+int8_t reset_state = TRUE;
 void altitude_estimate(float dt){
 	if(_gps.fix > 2){
+        int16_t vx = _gps.velocity[0];  // cm/s
+        int16_t vy = _gps.velocity[1];  // cm/s
+        int16_t vz = _gps.velocity[2];  // cm/s
+        int32_t ground_speed = sqrt(sq(vx) + sq(vy) + sq(vz)) ;
+        if(reset_state){
+            alt_estimate = _gps.altitude_msl/1000.0f;
+		    climb_rate = _gps.velocity[2]/100.0f;
+
+            velocity_abs = ground_speed/100.0f;
+            reset_state = FALSE;
+            return;
+        }
+        // estiate 
 		alt_estimate += climb_rate*dt + 0.5*sq(dt)*acc_Eframe[Z];
 		climb_rate += dt*acc_Eframe[Z];
+
+        float acc_abs = sqrtf(sq(acc_Eframe[X]) + sq(acc_Eframe[Y]) + sq(acc_Eframe[Z]));
+        velocity_abs += dt*acc_abs;
+
 		// correction
 		alt_estimate += 0.1*(_gps.altitude_msl/1000.0f - alt_estimate);
-		climb_rate += 0.1*(_gps.velocity[2]/100.0f - climb_rate);
+		climb_rate   += 0.1*(_gps.velocity[2]/100.0f - climb_rate);
+        velocity_abs += 0.1*(ground_speed/100.0f - velocity_abs);
 	}
 	else{
-		alt_estimate = _gps.altitude_msl/1000.0f;
-		climb_rate = _gps.velocity[2]/100.0f;
+        reset_state = TRUE;
 	}
 }
 

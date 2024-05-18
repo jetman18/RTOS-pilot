@@ -5,7 +5,7 @@
 ../Core/Src/freertos.c:101:6:vApplicationGetIdleTaskMemory	24	static
 ../Core/Src/freertos.c:115:6:MX_FREERTOS_Init	160	static
 ../Core/Src/freertos.c:184:6:ahrs_task	72	static
-../Core/Src/freertos.c:249:6:blackbox	56	static
-../Core/Src/freertos.c:363:6:led_indicate	16	static
-../Core/Src/freertos.c:403:6:read_sensor	72	static
-../Core/Src/freertos.c:475:6:mavlinkOSD	24	static
+../Core/Src/freertos.c:250:6:blackbox	56	static
+../Core/Src/freertos.c:366:6:led_indicate	16	static
+../Core/Src/freertos.c:406:6:read_sensor	72	static
+../Core/Src/freertos.c:478:6:mavlinkOSD	24	static

@@ -205,10 +205,10 @@ void ahrs_task(void const * argument)
     update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],micros());
     attitude_ctrl(micros());
 
-    /*** Altitude estimate ****/
+    /*** Altitude estimate 20 hz ****/ 
     static int8_t count_ = 0;
-	if(count_ >= 9){
-		altitude_estimate(0.1);
+	if(count_ >= 4){
+		altitude_estimate(0.05);
 		count_ = 0;
 	}
 	count_ ++;
@@ -238,8 +238,9 @@ extern float pid_velo_scale;;
 extern int32_t climb_rate_baro;
 extern int32_t puts_state;
 extern uint16_t servoL,servoR;
-uint32_t sdcard_fsize;
 extern float alt_estimate,climb_rate;
+extern float velocity_abs;
+uint32_t sdcard_fsize;
 /**
 * @brief Function implementing the task2 thread.
 * @param argument: Not used
@@ -331,6 +332,8 @@ void blackbox(void const * argument)
 	black_box_pack_int((int)(climb_rate*100));   // cm/s
 	black_box_pack_char(' '); 
 	black_box_pack_int(alt_baro);   // cm
+	black_box_pack_char(' ');
+	black_box_pack_int((int)(velocity_abs*100));   // cm
 
 	black_box_pack_char(' ');
 	black_box_pack_int((int)(pid_velo_scale*1000));   // cm

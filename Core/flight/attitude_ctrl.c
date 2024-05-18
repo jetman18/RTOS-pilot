@@ -45,7 +45,7 @@ int8_t speed_filter_reset;
 static pid_t roll_rate_pid,pitch_rate_pid;
 static pid_t roll_angle_pid,pitch_angle_pid;
 // rate stabilize
-static pid_t roll_rate_t,pitch_rate_t;
+//static pid_t roll_rate_t,pitch_rate_t;
 
 static int16_t smooth_ch1=0, smooth_ch2=0;
 
@@ -157,9 +157,9 @@ void attitude_ctrl(const uint32_t micros){
         pitch_rate_desired = constrainf(pitch_rate_desired, -pid_file_1.pitch_rate_limit, pid_file_1.pitch_rate_limit);
         float p_rate_pid  =  pid_calculate(&pitch_rate_pid, pitch_rate_measurement,pitch_rate_desired,pid_pitch_vel_scale ,dt);
         // reset I term
-        if(abs(pitch_angle_pid.err) < ERROR_RESET_I_TERM){
-            pitch_rate_pid.i_term = 0.0f;
-        }
+        //if(abs(pitch_angle_pid.err) < ERROR_RESET_I_TERM){
+        //    pitch_rate_pid.i_term = 0.0f;
+        //}
         // feed forward
         float FF_pitch = pitch_rate_desired*pid_file_1.pitch_FF_gain;;
         p_rate_pid = p_rate_pid + FF_pitch;

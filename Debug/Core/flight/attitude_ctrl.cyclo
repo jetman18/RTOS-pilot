@@ -5,6 +5,6 @@
 ../Core/flight/../Lib/utils.h:15:14:range180	3
 ../Core/flight/../Lib/utils.h:26:16:mapI	1
 ../Core/flight/../Lib/utils.h:30:14:mapf	1
-../Core/flight/attitude_ctrl.c:61:6:attitude_ctrl_init	1
-../Core/flight/attitude_ctrl.c:78:6:attitude_ctrl	10
-../Core/flight/attitude_ctrl.c:206:13:Altitude_control	1
+../Core/flight/attitude_ctrl.c:62:6:attitude_ctrl_init	1
+../Core/flight/attitude_ctrl.c:76:6:attitude_ctrl	14
+../Core/flight/attitude_ctrl.c:213:13:Altitude_control	1
