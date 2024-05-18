@@ -3086,31 +3086,31 @@ void ibus_init(UART_HandleTypeDef *uartt)
  800209e:	b084      	sub	sp, #16
  80020a0:	af00      	add	r7, sp, #0
  80020a2:	6078      	str	r0, [r7, #4]
-    for(int i = 0;i < IBUS_MAX_CHANNEL ; i++){
- 80020a4:	2300      	movs	r3, #0
- 80020a6:	60fb      	str	r3, [r7, #12]
- 80020a8:	e008      	b.n	80020bc <ibus_init+0x20>
-      ibusChannelData[i] = 1000;
- 80020aa:	4a11      	ldr	r2, [pc, #68]	@ (80020f0 <ibus_init+0x54>)
- 80020ac:	68fb      	ldr	r3, [r7, #12]
- 80020ae:	f44f 717a 	mov.w	r1, #1000	@ 0x3e8
- 80020b2:	f842 1023 	str.w	r1, [r2, r3, lsl #2]
-    for(int i = 0;i < IBUS_MAX_CHANNEL ; i++){
- 80020b6:	68fb      	ldr	r3, [r7, #12]
- 80020b8:	3301      	adds	r3, #1
- 80020ba:	60fb      	str	r3, [r7, #12]
- 80020bc:	68fb      	ldr	r3, [r7, #12]
- 80020be:	2b0d      	cmp	r3, #13
- 80020c0:	ddf3      	ble.n	80020aa <ibus_init+0xe>
-    }
     ibusChannelData[0] = 1500;
- 80020c2:	4b0b      	ldr	r3, [pc, #44]	@ (80020f0 <ibus_init+0x54>)
- 80020c4:	f240 52dc 	movw	r2, #1500	@ 0x5dc
- 80020c8:	601a      	str	r2, [r3, #0]
+ 80020a4:	4b12      	ldr	r3, [pc, #72]	@ (80020f0 <ibus_init+0x54>)
+ 80020a6:	f240 52dc 	movw	r2, #1500	@ 0x5dc
+ 80020aa:	601a      	str	r2, [r3, #0]
     ibusChannelData[1] = 1500;
- 80020ca:	4b09      	ldr	r3, [pc, #36]	@ (80020f0 <ibus_init+0x54>)
- 80020cc:	f240 52dc 	movw	r2, #1500	@ 0x5dc
- 80020d0:	605a      	str	r2, [r3, #4]
+ 80020ac:	4b10      	ldr	r3, [pc, #64]	@ (80020f0 <ibus_init+0x54>)
+ 80020ae:	f240 52dc 	movw	r2, #1500	@ 0x5dc
+ 80020b2:	605a      	str	r2, [r3, #4]
+    for(int i = 2;i < IBUS_MAX_CHANNEL ; i++){
+ 80020b4:	2302      	movs	r3, #2
+ 80020b6:	60fb      	str	r3, [r7, #12]
+ 80020b8:	e008      	b.n	80020cc <ibus_init+0x30>
+      ibusChannelData[i] = 1000;
+ 80020ba:	4a0d      	ldr	r2, [pc, #52]	@ (80020f0 <ibus_init+0x54>)
+ 80020bc:	68fb      	ldr	r3, [r7, #12]
+ 80020be:	f44f 717a 	mov.w	r1, #1000	@ 0x3e8
+ 80020c2:	f842 1023 	str.w	r1, [r2, r3, lsl #2]
+    for(int i = 2;i < IBUS_MAX_CHANNEL ; i++){
+ 80020c6:	68fb      	ldr	r3, [r7, #12]
+ 80020c8:	3301      	adds	r3, #1
+ 80020ca:	60fb      	str	r3, [r7, #12]
+ 80020cc:	68fb      	ldr	r3, [r7, #12]
+ 80020ce:	2b0d      	cmp	r3, #13
+ 80020d0:	ddf3      	ble.n	80020ba <ibus_init+0x1e>
+    }
 	uart = uartt;
  80020d2:	4a08      	ldr	r2, [pc, #32]	@ (80020f4 <ibus_init+0x58>)
  80020d4:	687b      	ldr	r3, [r7, #4]
