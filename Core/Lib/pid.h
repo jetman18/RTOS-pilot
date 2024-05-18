@@ -9,6 +9,8 @@ extern "C" {
 #include "stdio.h"
 
 typedef struct {
+	float err;
+	float err_fcut;
 	float kp;
 	float ki;
 	float kd;
@@ -19,8 +21,8 @@ typedef struct {
 	float f_cut_D;
 	uint8_t init;
 }pid_t;
-void  pid_init(pid_t  *pid_in,float kp, float ki, float kd, float f_cut_D, float maxI);
-float pid_calculate(pid_t *pid_in,float input, float setpoint,float scaler,float dt);
+void pid_init(pid_t  *pid_in,float kp, float ki, float kd,float f_cut_err, float f_cut_D, float maxI);
+float pid_calculate(pid_t *pid_in,float measurement, float setpoint,float scaler,float dt);
 void  pid_reset(pid_t *t);
 #ifdef __cplusplus
 }

@@ -14,7 +14,8 @@ typedef struct
     // roll axis
     int16_t roll_rate_limit;
     float roll_FF_gain;
-
+    
+    uint8_t roll_fcut_err;
     float roll_angle_Kp;
     float roll_rate_Kp;
     float roll_rate_Ki;
@@ -28,6 +29,7 @@ typedef struct
     int16_t pitch_rate_limit;
     float pitch_FF_gain;
 
+    uint8_t pitch_fcut_err;
     float pitch_angle_Kp;
     float pitch_rate_Kp;
     float pitch_rate_Ki;
@@ -46,6 +48,7 @@ static pid_profile_t pid_file_1={
     .roll_rate_limit = 80,
     .roll_FF_gain = 1.2f,
 
+    .roll_fcut_err = 5,
     .roll_angle_Kp = 2,
     .roll_rate_Kp  = 1.1,
     .roll_rate_Ki  = 1.5,
@@ -59,6 +62,7 @@ static pid_profile_t pid_file_1={
     .pitch_rate_limit = 180,
     .pitch_FF_gain = 1,
 
+    .pitch_fcut_err = 5,
     .pitch_angle_Kp = 3,
     .pitch_rate_Kp  = 1.5,
     .pitch_rate_Ki  = 1.5,
