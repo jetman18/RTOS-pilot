@@ -28,6 +28,8 @@ void ibus_init(UART_HandleTypeDef *uartt)
     for(int i = 0;i < IBUS_MAX_CHANNEL ; i++){
       ibusChannelData[i] = 1000;
     }
+    ibusChannelData[0] = 1500;
+    ibusChannelData[1] = 1500;
 	uart = uartt;
 #ifdef DMA_MODE
     is_receive_cpl = 0;

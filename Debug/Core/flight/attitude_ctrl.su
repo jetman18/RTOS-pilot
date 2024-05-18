@@ -1,6 +1,10 @@
 ../Core/flight/../Lib/maths.h:163:12:constrain	24	static
 ../Core/flight/../Lib/maths.h:173:21:constrainf	24	static
 ../Core/flight/../Lib/filter.h:13:21:pt1FilterGain	24	static
-../Core/flight/attitude_ctrl.c:61:6:attitude_ctrl_init	32	static
-../Core/flight/attitude_ctrl.c:78:6:attitude_ctrl	128	static
-../Core/flight/attitude_ctrl.c:210:13:Altitude_control	4	static
+../Core/flight/../Lib/utils.h:8:14:range360	16	static
+../Core/flight/../Lib/utils.h:15:14:range180	16	static
+../Core/flight/../Lib/utils.h:26:16:mapI	32	static
+../Core/flight/../Lib/utils.h:30:14:mapf	40	static
+../Core/flight/attitude_ctrl.c:62:6:attitude_ctrl_init	32	static
+../Core/flight/attitude_ctrl.c:79:6:attitude_ctrl	128	static
+../Core/flight/attitude_ctrl.c:212:13:Altitude_control	4	static

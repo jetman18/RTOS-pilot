@@ -8,6 +8,7 @@
 #include "../Lib/timer.h"
 #include "../Lib/gps.h"
 #include "../Lib/filter.h"
+#include "../Lib/utils.h"
 
 #include "../Driver/ibus.h"
 
@@ -18,9 +19,9 @@
 #define MINIMUN_SPEED    12    /* m/s  */
 #define MAXIMUN_SPEED    33    /* m/s  */
 
+#define MAX_ROLL_DESIRED 70
+#define MAX_PITCH_DESIRED 70
 
-#define ROLL_RATE_LIMIT    50 // 60 deg/s
-#define PITCH_RATE_LIMIT   50 // 60 deg/s
 #define MIN_PID_SPEED_SCALE 0.4f
 #define MAX_PID_SPEED_SCALE 1.0f
 
@@ -94,8 +95,17 @@ void attitude_ctrl(const uint32_t micros){
     
     /* calculate roll && pitch desired
     */
-    roll_desired = ((int)ibusChannelData[0] - 1500)*0.1f    + roll_trim;   /*  -50 <-  -> +50  */ 
-	pitch_desired = ((int)ibusChannelData[1] - 1500)*-0.15f + pitch_trim ;/*  -75 <-  -> +75  */ 
+
+	if(ibusChannelData[CH9] > CHANNEL_HIGH ){
+		roll_pid_rc_gain = ((int)ibusChannelData[CH7] - 1000)*0.002f;
+		roll_trim = ((int)ibusChannelData[CH8] - 1500)*-0.1f;
+	}else{
+		pitch_pid_rc_gain = ((int)ibusChannelData[CH7] - 1000)*0.002f;
+		pitch_trim = ((int)ibusChannelData[CH8] - 1500)*-0.1f;
+	}
+
+    roll_desired = ((int)ibusChannelData[0] - 1500)*0.15f    + roll_trim;   /*  -50 <-  -> +50  */
+	pitch_desired = ((int)ibusChannelData[1] - 1500)*-0.15f + pitch_trim ;/*  -75 <-  -> +75  */
 
     v_estimate = dynamic_speed_esitmate(dt);
     if(v_estimate < 0)
@@ -132,14 +142,6 @@ void attitude_ctrl(const uint32_t micros){
 
     // stabilize mode
     if(ibusChannelData[CH5] > CHANNEL_HIGH ){
-    	if(ibusChannelData[CH9] > CHANNEL_HIGH ){
-			roll_pid_rc_gain = ((int)ibusChannelData[CH7] - 1000)*0.002f;
-			roll_trim = ((int)ibusChannelData[CH8] - 1500)*-0.1f;
-		}else{
-			pitch_pid_rc_gain = ((int)ibusChannelData[CH7] - 1000)*0.002f;
-			pitch_trim = ((int)ibusChannelData[CH8] - 1500)*-0.1f;
-		}
-        
         /*----- roll axis pid   -----*/
         float roll_rate_desired =  pid_calculate(&roll_angle_pid,roll_measurement,roll_desired,1.0f,dt);
         // limit rate

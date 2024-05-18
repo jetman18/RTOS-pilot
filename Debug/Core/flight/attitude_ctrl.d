@@ -33,7 +33,7 @@ Core/flight/attitude_ctrl.o: ../Core/flight/attitude_ctrl.c \
  ../Core/flight/../Lib/maths.h ../Core/flight/../Lib/pwm.h \
  ../Core/Inc/tim.h ../Core/Inc/main.h ../Core/flight/../Lib/timer.h \
  ../Core/flight/../Lib/gps.h ../Core/flight/../Lib/filter.h \
- ../Core/flight/../Driver/ibus.h
+ ../Core/flight/../Lib/utils.h ../Core/flight/../Driver/ibus.h
 ../Core/flight/plane.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -74,4 +74,5 @@ Core/flight/attitude_ctrl.o: ../Core/flight/attitude_ctrl.c \
 ../Core/flight/../Lib/timer.h:
 ../Core/flight/../Lib/gps.h:
 ../Core/flight/../Lib/filter.h:
+../Core/flight/../Lib/utils.h:
 ../Core/flight/../Driver/ibus.h:
