@@ -1,6 +1,6 @@
 ../Core/flight/../Lib/maths.h:163:12:constrain	3
 ../Core/flight/../Lib/maths.h:173:21:constrainf	3
 ../Core/flight/../Lib/filter.h:13:21:pt1FilterGain	1
-../Core/flight/attitude_ctrl.c:55:6:attitude_ctrl_init	1
-../Core/flight/attitude_ctrl.c:72:6:attitude_ctrl	11
-../Core/flight/attitude_ctrl.c:205:6:rate_stabilize	2
+../Core/flight/attitude_ctrl.c:61:6:attitude_ctrl_init	1
+../Core/flight/attitude_ctrl.c:78:6:attitude_ctrl	11
+../Core/flight/attitude_ctrl.c:210:13:Altitude_control	1

@@ -1,8 +1,7 @@
 ../Core/Lib/maths.h:163:12:constrain	3
-../Core/Lib/gps.c:165:6:gps_init	1
-../Core/Lib/gps.c:189:21:gps_uart_port	1
+../Core/Lib/gps.c:167:6:gps_init	1
+../Core/Lib/gps.c:193:21:gps_uart_port	1
 ../Core/Lib/gps.c:199:6:gps_thread	3
-../Core/Lib/gps.c:223:6:gps_callback	1
-../Core/Lib/gps.c:234:13:_update_checksum	2
-../Core/Lib/gps.c:242:16:parse_msg	13
-../Core/Lib/gps.c:314:16:newdata	18
+../Core/Lib/gps.c:220:6:gps_callback	1
+../Core/Lib/gps.c:240:16:parse_msg	13
+../Core/Lib/gps.c:325:16:newdata	18

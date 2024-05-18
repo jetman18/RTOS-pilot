@@ -1,30 +1,36 @@
 #include "plane.h"
+#include "pid_profile.h"
+
 #include "../Lib/pid.h"
 #include "../Lib/imu.h"
 #include "../Lib/maths.h"
 #include "../Lib/pwm.h"
 #include "../Lib/timer.h"
-#include "../Driver/ibus.h"
 #include "../Lib/gps.h"
 #include "../Lib/filter.h"
 
-#define LOOP_TIM         0.01f  // Seconds
+#include "../Driver/ibus.h"
+
 #define SERVO_MAX_PWM    2000
 #define SERVO_MIN_PWM    1000
 #define MAX_SPEED        30    //m/s
 #define MAX_WAIT_TIME    0.1f
-#define F_CUT_OFF        0
 #define MINIMUN_SPEED    12    /* m/s  */
 #define MAXIMUN_SPEED    33    /* m/s  */
 
-// PID
+
 #define ROLL_RATE_LIMIT    50 // 60 deg/s
 #define PITCH_RATE_LIMIT   50 // 60 deg/s
-#define MIN_PID_SPEED_SCALE 0.3f
+#define MIN_PID_SPEED_SCALE 0.4f
 #define MAX_PID_SPEED_SCALE 1.0f
 
-#define FF_ROLL_GAIN 1.5
-#define FF_PITCH_GAIN 10
+
+typedef enum{
+    ROLL_PITCH_CTRL = 0,
+    SPEED_CTRL,
+    YAW_CTRL,
+    ALT
+}attitude_ctr_priority_e;
 
 extern attitude_t AHRS;
 
@@ -57,19 +63,19 @@ void attitude_ctrl_init(){
    speed_filter_reset = TRUE;
    ab_speed_filted = 0.0f;
    // init pid 
-   pid_init(&roll_angle_pid,3,0,0,F_CUT_OFF,100);
-   pid_init(&roll_rate_pid,1.5,2.5,0,0,130);
+   pid_init(&roll_angle_pid, pid_file_1.roll_angle_Kp,0,0,0,0);
+   pid_init(&roll_rate_pid, pid_file_1.roll_rate_Kp, pid_file_1.roll_rate_Ki, pid_file_1.roll_rate_Kd, pid_file_1.roll_f_cut_rate_D, pid_file_1.roll_max_I);
 
-   pid_init(&pitch_angle_pid,3,0,0,F_CUT_OFF,100);
-   pid_init(&pitch_rate_pid,1.5,2.5,0,F_CUT_OFF,130);
+   pid_init(&pitch_angle_pid, pid_file_1.pitch_angle_Kp,0,0,0,0);
+   pid_init(&pitch_rate_pid,pid_file_1.pitch_rate_Kp,pid_file_1.pitch_rate_Ki,pid_file_1.pitch_rate_Kd,pid_file_1.pitch_f_cut_rate_D,pid_file_1.pitch_max_I);
 
    // rate 
-   pid_init(&roll_rate_t,4,0,0,F_CUT_OFF,300);
-   pid_init(&pitch_rate_t,4,0,0,F_CUT_OFF,300);
+   //pid_init(&roll_rate_t,4,0,0,F_CUT_OFF,300);
+   //pid_init(&pitch_rate_t,4,0,0,F_CUT_OFF,300);
 
 }
 
-void attitude_ctrl(uint32_t micros){
+void attitude_ctrl(const uint32_t micros){
     static uint32_t last_time_us; 
     float dt = (micros - last_time_us)*(1e-6f);
     last_time_us = micros;
@@ -95,7 +101,7 @@ void attitude_ctrl(uint32_t micros){
     if(v_estimate < 0)
     	v_estimate = 0;
 
-    // pid scale with velocity
+    /*---- pid scale with velocity  -----*/
 	float pid_velo_scale;
     if(_gps.fix > 1){
         float vn = (float)_gps.velocity[0]/100;  // m
@@ -110,21 +116,19 @@ void attitude_ctrl(uint32_t micros){
         }
         ab_speed_filted += pt1FilterGain(10,dt)*(absolute_velocity - ab_speed_filted);
         float speed_temp = constrainf(ab_speed_filted,MINIMUN_SPEED,MAXIMUN_SPEED);
-        pid_velo_scale = (float)MINIMUN_SPEED/((float)MINIMUN_SPEED + sq(speed_temp - MINIMUN_SPEED)*0.045f);
+        pid_velo_scale = (float)MINIMUN_SPEED/((float)MINIMUN_SPEED + sq(speed_temp - MINIMUN_SPEED)*0.04f);
     }
     else{
         speed_filter_reset = TRUE;
-
     	if(ibusChannelData[CH6] > CHANNEL_HIGH){
     		pid_velo_scale = 1;
     	}else{
-    		pid_velo_scale = 0.3f;
+    		pid_velo_scale = 0.4f;
     	}
     }
-    //float v_ = constrainf(v_estimate - 15,0,15);
-	//pid_velo_scale = 15.0f/(15.0f + sq(v_)*0.07f);
+
     const float pid_roll_vel_scale  = constrainf(pid_velo_scale,MIN_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
-    const float pid_pitch_vel_scale = constrainf(pid_velo_scale,MIN_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
+    const float pid_pitch_vel_scale = constrainf(pid_velo_scale,MIN_PID_SPEED_SCALE + 0.2,MAX_PID_SPEED_SCALE);
 
     // stabilize mode
     if(ibusChannelData[CH5] > CHANNEL_HIGH ){
@@ -136,37 +140,47 @@ void attitude_ctrl(uint32_t micros){
 			pitch_trim = ((int)ibusChannelData[CH8] - 1500)*-0.1f;
 		}
         
-        // roll axis pid
+        /*----- roll axis pid   -----*/
         float roll_rate_desired =  pid_calculate(&roll_angle_pid,roll_measurement,roll_desired,1.0f,dt);
-        roll_rate_desired = constrainf(roll_rate_desired,-ROLL_RATE_LIMIT,ROLL_RATE_LIMIT);
+        // limit rate
+        roll_rate_desired = constrainf(roll_rate_desired, -pid_file_1.roll_rate_limit, pid_file_1.roll_rate_limit);
         float r_rate_pid  =  pid_calculate(&roll_rate_pid, roll_rate_measurement,roll_rate_desired,pid_roll_vel_scale,dt);
-        float FF_roll = roll_rate_desired*FF_ROLL_GAIN;
+        // feed forward
+        float FF_roll = roll_rate_desired*pid_file_1.roll_FF_gain;
         r_rate_pid = r_rate_pid + FF_roll;
-        roll_pid_smooth += pt1FilterGain(4,dt)*(r_rate_pid - roll_pid_smooth);
+        r_rate_pid = constrainf(r_rate_pid, -pid_file_1.roll_max_pid, pid_file_1.roll_max_pid);
+        // filter pid  LPF
+        roll_pid_smooth += pt1FilterGain(pid_file_1.roll_pid_fcut,dt)*(r_rate_pid - roll_pid_smooth);
 
-        //pitch axis pid
-        float pitch_rate_desired =  pid_calculate(&pitch_angle_pid,pitch_measurement,pitch_desired,0.1f,dt);
-        pitch_rate_desired = constrainf(pitch_rate_desired,-PITCH_RATE_LIMIT,PITCH_RATE_LIMIT);
+        /*-----  pitch axis pid  ---------*/
+        float pitch_rate_desired =  pid_calculate(&pitch_angle_pid,pitch_measurement,pitch_desired,1.0f,dt);
+        // limit rate
+        pitch_rate_desired = constrainf(pitch_rate_desired, -pid_file_1.pitch_rate_limit, pid_file_1.pitch_rate_limit);
         float p_rate_pid  =  pid_calculate(&pitch_rate_pid, pitch_rate_measurement,pitch_rate_desired,pid_pitch_vel_scale ,dt);
-        float FF_pitch = pitch_rate_desired*FF_PITCH_GAIN;
+        // feed forward
+        float FF_pitch = pitch_rate_desired*pid_file_1.pitch_FF_gain;;
         p_rate_pid = p_rate_pid + FF_pitch;
-        pitch_pid_smooth += pt1FilterGain(4,dt)*(p_rate_pid - pitch_pid_smooth);
+        p_rate_pid = constrainf(p_rate_pid,- pid_file_1.pitch_max_pid, pid_file_1.pitch_max_pid);
+        // filter pid  LPF
+        pitch_pid_smooth += pt1FilterGain(pid_file_1.pitch_pid_fcut,dt)*(p_rate_pid - pitch_pid_smooth);
+        
 
-        //r_rate_pid = r_rate_pid * roll_pid_rc_gain;
-        //p_rate_pid = p_rate_pid * pid_pitch_vel_scale;// * pitch_pid_rc_gain;
-
+        /*-------------- mix channel --------------------------*/
 		if(ibusChannelData[CH9] > CHANNEL_HIGH ){
+                // roll stabilize
 				int pitch_rc = 1500 - ibusChannelData[CH2];
 
 				servoL = 1500 - roll_pid_smooth + pitch_rc;
 				servoR = 1500 + roll_pid_smooth + pitch_rc;
 		}else{
+               // pitch stabilize
 				int roll_rc = 1500 - ibusChannelData[CH1];
 
 				servoL = 1500 +  roll_rc*0.5 + pitch_pid_smooth;
 				servoR = 1500 -  roll_rc*0.5 + pitch_pid_smooth;
 		}
 
+        // enable or disable I term, for test only
 		if(ibusChannelData[CH10] > CHANNEL_HIGH ){
 			pitch_rate_pid.i_term = 0;
 			roll_rate_pid.i_term = 0;
@@ -188,8 +202,12 @@ void attitude_ctrl(uint32_t micros){
 
     servoL = constrain(servoL,SERVO_MIN_PWM,SERVO_MAX_PWM);
     servoR = constrain(servoR,SERVO_MIN_PWM,SERVO_MAX_PWM);
-
     write_pwm_ctrl(ibusChannelData[CH3],servoL,servoR);
+
+}
+
+
+static void Altitude_control(){
 
 }
 
@@ -202,7 +220,7 @@ void attitude_ctrl(uint32_t micros){
         //pitch axis
         float pitch_rate_desired =  pid_calculate(&pitch_angle_pid,pitch_measurement,pitch_desired + pitch_trim,dt);
         float p_rate_pid  = -pid_calculate(&pitch_rate_pid,-pitch_rate_measurement,pitch_rate_desired,dt);
-*/
+
 
 void rate_stabilize(float dt){
     uint16_t servoL;
@@ -248,4 +266,4 @@ void rate_stabilize(float dt){
     write_pwm_ctrl(ibusChannelData[CH3],servoL,servoR);
 
 }
-
+*/

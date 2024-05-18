@@ -6,6 +6,6 @@
 ../Core/Src/freertos.c:115:6:MX_FREERTOS_Init	160	static
 ../Core/Src/freertos.c:182:6:ahrs_task	72	static
 ../Core/Src/freertos.c:246:6:blackbox	56	static
-../Core/Src/freertos.c:352:6:led_indicate	16	static
-../Core/Src/freertos.c:390:6:read_sensor	72	static
-../Core/Src/freertos.c:460:6:mavlinkOSD	24	static
+../Core/Src/freertos.c:355:6:led_indicate	16	static
+../Core/Src/freertos.c:393:6:read_sensor	72	static
+../Core/Src/freertos.c:463:6:mavlinkOSD	24	static

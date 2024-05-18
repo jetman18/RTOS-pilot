@@ -145,6 +145,8 @@ static uint8_t _msg_id;
 uint16_t _payload_length;
 uint16_t _payload_counter;
 
+int32_t terrain_altitude;
+int8_t gps_alt_zero_calibrate;
 static union {
     ubx_nav_posllh posllh;
     ubx_nav_status status;
@@ -164,6 +166,8 @@ static uint8_t parse_msg();
  */
 void gps_init(UART_HandleTypeDef *uart,uint32_t baudrate)
 {
+    terrain_altitude = 0;
+    gps_alt_zero_calibrate = FALSE;
 	_gpsUartPort = uart;
     _gps.timer_ = millis();
     // reset all viriables
@@ -190,14 +194,10 @@ UART_HandleTypeDef *gps_uart_port(){
     return _gpsUartPort;
 }
 
-
-/*
- * Read data from loop
- */
 const uint32_t thread_timeout_us = 500; // timeout 500us
 const uint32_t thread_max_wait_time_us = 1000; // timeout 500us
 void gps_thread(){
-    uint32_t current_time_ms = millis();
+   // uint32_t current_time_ms = millis();
     while(1)
     {
         uint8_t read_f = HAL_UART_Receive(_gpsUartPort, &_char,ONE_BYTE,thread_timeout_us);
@@ -216,9 +216,6 @@ void gps_thread(){
 
 }
 
-/* 
- * REad gps by using interrup
- */
 uint32_t gps_interrupt_count;
 void gps_callback()
 {
@@ -230,7 +227,7 @@ void gps_callback()
 
 
 
-
+/*
 static void _update_checksum(uint8_t *data, uint8_t len, uint8_t *ck_a, uint8_t *ck_b)
 {
     while (len--) {
@@ -239,16 +236,30 @@ static void _update_checksum(uint8_t *data, uint8_t len, uint8_t *ck_a, uint8_t 
         data++;
     }
 }
+*/
 static uint8_t parse_msg(){
     static uint8_t _new_speed;
-    static uint8_t next_fix;
+    //static uint8_t next_fix;
     static uint32_t lastPosUpdateTime;
     static uint8_t _new_position;
+    static uint8_t gps_cali_count = 0;
     switch (_msg_id) {
         case MSG_POSLLH:
             _gps.position[LON] = _buffer.posllh.longitude;
             _gps.position[LAT] = _buffer.posllh.latitude;
-            _gps.altitude_msl = _buffer.posllh.altitude_msl;
+            if(gps_alt_zero_calibrate == FALSE){
+                if(gps_cali_count < 20){
+                    terrain_altitude += _buffer.posllh.altitude_msl;
+                    gps_cali_count ++;
+                }
+                else{
+                    gps_alt_zero_calibrate = TRUE;
+                }
+            }
+            else{
+               _gps.altitude_mgl = _buffer.posllh.altitude_msl - terrain_altitude/20; 
+            }
+            _gps.altitude_msl = _buffer.posllh.altitude_msl - terrain_altitude; 
             _gps.horizontalAccuracy = _buffer.posllh.horizontal_accuracy;
             _gps.VerticalAccuracy = _buffer.posllh.vertical_accuracy;
             /* time update position */
@@ -262,7 +273,7 @@ static uint8_t parse_msg(){
             _new_position = TRUE;
             break;
         case MSG_STATUS:
-            next_fix = (_buffer.status.fix_status & NAV_STATUS_FIX_VALID) && (_buffer.status.fix_type == FIX_3D);
+            //next_fix = (_buffer.status.fix_status & NAV_STATUS_FIX_VALID) && (_buffer.status.fix_type == FIX_3D);
             //if (!next_fix)
             //    _gps.fix = FALSE;
             _gps.fix = _buffer.status.fix_type;

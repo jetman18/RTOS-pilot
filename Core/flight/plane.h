@@ -23,7 +23,7 @@ void mavlink_send_attitude(float roll,float pitch, float yaw);
 void mavlink_osd();
 
 // attitude contrller
-void attitude_ctrl(uint32_t micros);
+void attitude_ctrl(const uint32_t micros);
 void rate_stabilize(float dt);
 void attitude_ctrl_init();
 // mainloop

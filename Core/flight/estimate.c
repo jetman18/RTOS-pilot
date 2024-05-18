@@ -7,7 +7,7 @@
 #include "../Driver/ibus.h"
 #include "../Driver/ms5611.h"
 
-extern float acc_Eframe[];
+extern float acc_Eframe[3];
 float alt_estimate,climb_rate;
 
 void altitude_estimate(float dt){
@@ -15,18 +15,14 @@ void altitude_estimate(float dt){
 		alt_estimate += climb_rate*dt + 0.5*sq(dt)*acc_Eframe[Z];
 		climb_rate += dt*acc_Eframe[Z];
 		// correction
-		alt_estimate += 0.04*(_gps.altitude_msl/1000.0f - alt_estimate);
-		climb_rate += 0.05*(_gps.velocity[2]/100.0f - climb_rate);
+		alt_estimate += 0.1*(_gps.altitude_msl/1000.0f - alt_estimate);
+		climb_rate += 0.1*(_gps.velocity[2]/100.0f - climb_rate);
 	}
 	else{
 		alt_estimate = _gps.altitude_msl/1000.0f;
 		climb_rate = _gps.velocity[2]/100.0f;
 	}
 }
-
-
-
-
 
 static float gravity  = -9.81 ;
 //static float toDeg = 57.29577;

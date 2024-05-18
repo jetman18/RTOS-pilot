@@ -311,6 +311,8 @@ void blackbox(void const * argument)
 	black_box_pack_char(' ');
 	black_box_pack_int(_gps.altitude_msl);
 	black_box_pack_char(' ');
+	black_box_pack_int(_gps.altitude_mgl);
+	black_box_pack_char(' ');
 	black_box_pack_int(_gps.numSat);
 	black_box_pack_char(' ');
 	black_box_pack_int(_gps.fix);
