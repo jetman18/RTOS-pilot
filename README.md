@@ -52,7 +52,7 @@ Flight controller for fixed-wing uav
 <img src="./images/roll_ctr.jpg" width="700" height="350" />
 </p>
 
-### Ritch axis 
+### Pitch axis 
 
 [//]:<p align="center">
 <img src="./images/pitch1.png" width="700" height="350" />
