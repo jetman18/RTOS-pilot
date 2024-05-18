@@ -57,3 +57,9 @@ Flight controller for fixed-wing uav
 [//]:<p align="center">
 <img src="./images/pitch1.png" width="700" height="350" />
 </p>
+
+### Altitude comparison
+
+[//]:<p align="center">
+<img src="./images/altitude_compare2.png" width="700" height="350" />
+</p>
