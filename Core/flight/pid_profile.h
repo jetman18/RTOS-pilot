@@ -44,10 +44,10 @@ static pid_profile_t pid_file_1={
     .min_servo = 1000,
 
     .roll_rate_limit = 80,
-    .roll_FF_gain = 1.5f,
+    .roll_FF_gain = 1.2f,
 
-    .roll_angle_Kp = 3,
-    .roll_rate_Kp  = 1.5, 
+    .roll_angle_Kp = 2,
+    .roll_rate_Kp  = 1.1,
     .roll_rate_Ki  = 1.5,
     .roll_rate_Kd  = 0,
     .roll_f_cut_rate_D = 0,

@@ -162,11 +162,13 @@ void MX_FREERTOS_Init(void) {
 
 /* USER CODE BEGIN Header_ahrs_task */
 /********** stack check ********/
+#ifdef STACK_DEBUG
 uint16_t stack_task_ahrs;
 uint16_t stack_task_led;
 uint16_t stack_task_sensor;
 uint16_t stack_task_mavOSD;
 uint16_t stack_task_blackbox;
+#endif
 /***************************/
 int32_t alt_baro;
 int16_t gyro_imu[3];
@@ -220,8 +222,9 @@ void ahrs_task(void const * argument)
 
     //vTaskSuspend(NULL);
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
+#ifdef STACK_DEBUG
     stack_task_ahrs = uxTaskGetStackHighWaterMark( NULL );
-
+#endif
   }
   /* USER CODE END ahrs_task */
 }
@@ -231,7 +234,7 @@ uint32_t write_time;
 extern float roll_desired;
 extern float pitch_desired;
 extern float ab_speed_filted;
-extern float v_estimate;
+extern float pid_velo_scale;;
 extern int32_t climb_rate_baro;
 extern int32_t puts_state;
 extern uint16_t servoL,servoR;
@@ -329,6 +332,9 @@ void blackbox(void const * argument)
 	black_box_pack_char(' '); 
 	black_box_pack_int(alt_baro);   // cm
 
+	black_box_pack_char(' ');
+	black_box_pack_int((int)(pid_velo_scale*1000));   // cm
+
 	/*----- end line && load data to sd card- -----*/
 	sdcard_fsize = black_box_get_file_size();
 	black_box_pack_char('\n');
@@ -340,7 +346,9 @@ void blackbox(void const * argument)
 	}
 
 	vTaskDelayUntil( &xLastWakeTime, xFrequency);
+#ifdef STACK_DEBUG
     stack_task_blackbox = uxTaskGetStackHighWaterMark( NULL );
+#endif
   }
   /* USER CODE END blackbox */
 }
@@ -376,7 +384,9 @@ void led_indicate(void const * argument)
 	if(_gps.fix > 1){
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	}
+#ifdef STACK_DEBUG
 	stack_task_led = uxTaskGetStackHighWaterMark( NULL );
+#endif
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
     osDelay(100);
   }
@@ -446,7 +456,9 @@ void read_sensor(void const * argument)
 		acc_imu[0] += 0.1*(raw.x - acc_imu[0]);
 		acc_imu[1] += 0.1*(raw.y - acc_imu[1]);
 		acc_imu[2] += 0.1*(raw.z - acc_imu[2]);
+#ifdef STACK_DEBUG
 	    stack_task_sensor = uxTaskGetStackHighWaterMark( NULL );
+#endif
 		vTaskDelayUntil( &xLastWakeTime, xFrequency );
 	}
 		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3); // debug
@@ -473,7 +485,9 @@ void mavlinkOSD(void const * argument)
 	mavlink_osd();
 	//mavlink_send_heartbeat();
 	vTaskDelayUntil( &xLastWakeTime, xFrequency);
+#ifdef STACK_DEBUG
     stack_task_mavOSD = uxTaskGetStackHighWaterMark( NULL );
+#endif
   }
   /* USER CODE END mavlinkOSD */
 }

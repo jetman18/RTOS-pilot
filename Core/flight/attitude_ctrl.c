@@ -53,8 +53,7 @@ float roll_trim,pitch_trim;
 
 float ab_speed_filted;
 
-float v_estimate;
-
+float pid_velo_scale;
 
 /*
  *  init pid controller
@@ -107,12 +106,7 @@ void attitude_ctrl(const uint32_t micros){
     roll_desired = ((int)ibusChannelData[0] - 1500)*0.15f    + roll_trim;   /*  -50 <-  -> +50  */
 	pitch_desired = ((int)ibusChannelData[1] - 1500)*-0.15f + pitch_trim ;/*  -75 <-  -> +75  */
 
-    v_estimate = dynamic_speed_esitmate(dt);
-    if(v_estimate < 0)
-    	v_estimate = 0;
-
     /*---- pid scale with velocity  -----*/
-	float pid_velo_scale;
     if(_gps.fix > 1){
         float vn = (float)_gps.velocity[0]/100;  // m
         float ve = (float)_gps.velocity[1]/100;  // m
