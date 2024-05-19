@@ -31,9 +31,8 @@ Core/Lib/compass.o: ../Core/Lib/compass.c \
  ../Core/Lib/../Driver/hmc5883.h ../Core/Lib/../Driver/../lib/axis.h \
  ../Core/Lib/../Driver/qmc5883.h ../Core/Lib/maths.h \
  ../Core/Lib/compass.h ../Core/Lib/axis.h ../Core/Lib/timer.h \
- ../Core/Lib/faulthandler.h ../Core/Lib/../epprom/AT24Cxx_stm32_hal.h \
- ../Core/Lib/blackbox.h ../FATFS/App/fatfs.h \
- ../Middlewares/Third_Party/FatFs/src/ff.h \
+ ../Core/Lib/../epprom/AT24Cxx_stm32_hal.h ../Core/Lib/blackbox.h \
+ ../FATFS/App/fatfs.h ../Middlewares/Third_Party/FatFs/src/ff.h \
  ../Middlewares/Third_Party/FatFs/src/integer.h ../FATFS/Target/ffconf.h \
  ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h \
@@ -96,7 +95,6 @@ Core/Lib/compass.o: ../Core/Lib/compass.c \
 ../Core/Lib/compass.h:
 ../Core/Lib/axis.h:
 ../Core/Lib/timer.h:
-../Core/Lib/faulthandler.h:
 ../Core/Lib/../epprom/AT24Cxx_stm32_hal.h:
 ../Core/Lib/blackbox.h:
 ../FATFS/App/fatfs.h:

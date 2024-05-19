@@ -10,7 +10,6 @@
 #include "maths.h"
 #include "compass.h"
 #include "timer.h"
-#include "faulthandler.h"
 #include "axis.h"
 
 #include "../epprom/AT24Cxx_stm32_hal.h"

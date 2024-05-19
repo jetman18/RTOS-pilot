@@ -6,5 +6,5 @@
 ../Core/flight/../Lib/utils.h:26:16:mapI	32	static
 ../Core/flight/../Lib/utils.h:30:14:mapf	40	static
 ../Core/flight/attitude_ctrl.c:62:6:attitude_ctrl_init	48	static
-../Core/flight/attitude_ctrl.c:76:6:attitude_ctrl	128	static
-../Core/flight/attitude_ctrl.c:213:13:Altitude_control	4	static
+../Core/flight/attitude_ctrl.c:76:6:attitude_ctrl	88	static
+../Core/flight/attitude_ctrl.c:214:13:Altitude_control	4	static

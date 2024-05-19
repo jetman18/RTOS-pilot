@@ -47,6 +47,7 @@ void MX_SDIO_SD_Init(void)
   hsd.Init.ClockDiv = 255;
   /* USER CODE BEGIN SDIO_Init 2 */
   hsd.Init.ClockDiv = 255;
+  HAL_SD_Init(&hsd);
   /* USER CODE END SDIO_Init 2 */
 
 }

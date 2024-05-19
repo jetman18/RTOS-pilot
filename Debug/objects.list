@@ -7,7 +7,6 @@
 "./Core/Lib/baro.o"
 "./Core/Lib/blackbox.o"
 "./Core/Lib/compass.o"
-"./Core/Lib/faulthandler.o"
 "./Core/Lib/gps.o"
 "./Core/Lib/imu.o"
 "./Core/Lib/maths.o"

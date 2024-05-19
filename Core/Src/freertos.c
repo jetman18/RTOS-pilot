@@ -135,7 +135,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of task1 */
-  osThreadDef(task1, ahrs_task, osPriorityHigh, 0, 128);
+  osThreadDef(task1, ahrs_task, osPriorityHigh, 0, 200);
   task1Handle = osThreadCreate(osThread(task1), NULL);
 
   /* definition and creation of task2 */
@@ -162,6 +162,7 @@ void MX_FREERTOS_Init(void) {
 
 /* USER CODE BEGIN Header_ahrs_task */
 /********** stack check ********/
+#define STACK_DEBUG
 #ifdef STACK_DEBUG
 uint16_t stack_task_ahrs;
 uint16_t stack_task_led;
@@ -185,7 +186,7 @@ void ahrs_task(void const * argument)
 {
   /* USER CODE BEGIN ahrs_task */
 	ibus_init(&huart2);
-	gps_init(&huart3,57600);
+	gps_init(&huart3,115200);
 	attitude_ctrl_init();
 	initPWM(&htim3);
     baro_init();
@@ -204,21 +205,6 @@ void ahrs_task(void const * argument)
     ibusFrameComplete();
     update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],micros());
     attitude_ctrl(micros());
-
-    /*** Altitude estimate 20 hz ****/ 
-    static int8_t count_ = 0;
-	if(count_ >= 4){
-		altitude_estimate(0.05);
-		count_ = 0;
-	}
-	count_ ++;
-
-    if(ibusChannelData[CH5] < CHANNEL_HIGH ){
-    	 vTaskSuspend(task2Handle);
-    	 black_box_reset = TRUE;
-    }else{
-    	 vTaskResume(task2Handle);
-    }
 
     //vTaskSuspend(NULL);
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
@@ -241,6 +227,8 @@ extern uint16_t servoL,servoR;
 extern float alt_estimate,climb_rate;
 extern float velocity_abs;
 uint32_t sdcard_fsize;
+int32_t error_count;
+extern SD_HandleTypeDef hsd;
 /**
 * @brief Function implementing the task2 thread.
 * @param argument: Not used
@@ -255,98 +243,102 @@ void blackbox(void const * argument)
 	black_box_init();
 	black_box_reset = TRUE;
 	TickType_t xLastWakeTime;
-	const TickType_t xFrequency = 50;  // 25 ms
+	const TickType_t xFrequency = 100;  // 25 ms
 	xLastWakeTime = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
 	static uint32_t start_time_ms;
-	uint32_t current_time = micros();
-    if(black_box_reset){
-    	black_box_pack_str("----------------------------new data----------------------------------------------------------------\n");
-    	black_box_reset = FALSE;
-    	start_time_ms = millis();
+    if(ibusChannelData[CH5] > CHANNEL_HIGH ){
+		if(black_box_reset){
+			black_box_pack_str("----------------------------new data----------------------------------------------------------------\n");
+			black_box_reset = FALSE;
+			start_time_ms = millis();
+		}
+		uint32_t time_ms =  millis() - start_time_ms;
+		// control thortle 0 -> 100%
+		int throtle = ((int)ibusChannelData[CH3] - 1000)*0.1;
+
+		// tx signal 0 -> 100 %
+		int srri = ((int)ibusChannelData[CH11] - 1000)*0.1;
+
+		/*** write time  ***/
+		black_box_pack_int(time_ms);
+		black_box_pack_char(' ');
+
+		/*---- control parameters ---*/
+		black_box_pack_int((int)servoL);
+		black_box_pack_char(' ');
+		black_box_pack_int((int)servoR);
+		black_box_pack_char(' ');
+		black_box_pack_int(throtle);
+		black_box_pack_char(' ');
+		black_box_pack_int(srri);
+		black_box_pack_char(' ');
+
+		/*----- atitude ---------------------*/
+		black_box_pack_int((int)(AHRS.roll*100));
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(roll_desired*100));
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(AHRS.pitch*100));// cm
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(pitch_desired*100));
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(AHRS.yaw*100));
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(AHRS.yaw_rate*100));
+		black_box_pack_char(' ');
+
+		/*------- GPS ----------------------*/
+		int16_t vx = _gps.velocity[0];  // cm/s
+		int16_t vy = _gps.velocity[1];  // cm/s
+		int16_t vz = _gps.velocity[2];  // cm/s
+		int32_t ground_speed = sqrt(sq(vx) + sq(vy)) ;
+
+		black_box_pack_int(_gps.position[0]);
+		black_box_pack_char(' ');
+		black_box_pack_int(_gps.position[1]);
+		black_box_pack_char(' ');
+		black_box_pack_int(_gps.altitude_msl);
+		black_box_pack_char(' ');
+		black_box_pack_int(_gps.altitude_mgl);
+		black_box_pack_char(' ');
+		black_box_pack_int(_gps.numSat);
+		black_box_pack_char(' ');
+		black_box_pack_int(_gps.fix);
+		black_box_pack_char(' ');
+		black_box_pack_int(ground_speed);
+		black_box_pack_char(' ');
+		black_box_pack_int(vz);
+
+		/*---- estimate ---------------------------*/
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(alt_estimate*100)); //cm
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(climb_rate*100));   // cm/s
+		black_box_pack_char(' ');
+		black_box_pack_int(alt_baro);   // cm
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(velocity_abs*100));   // cm
+
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(pid_velo_scale*1000));   // cm
+
+		/*----- end line && load data to sd card- -----*/
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+		//sdcard_fsize = black_box_get_file_size();
+		black_box_pack_char('\n');
+		black_box_load();
+    }else{
+    	black_box_reset = TRUE;
     }
-    uint32_t time_ms =  millis() - start_time_ms;
-
-	// control thortle 0 -> 100%
-	int throtle = ((int)ibusChannelData[CH3] - 1000)*0.1;
-
-	// tx signal 0 -> 100 %
-	int srri = ((int)ibusChannelData[CH11] - 1000)*0.1;
-
-	/*** write time  ***/
-    black_box_pack_int(time_ms);
-    black_box_pack_char(' ');
-
-	/*---- control parameters ---*/
-	black_box_pack_int((int)servoL);
-    black_box_pack_char(' ');
-	black_box_pack_int((int)servoR);
-    black_box_pack_char(' ');
-	black_box_pack_int(throtle);
-    black_box_pack_char(' ');
-	black_box_pack_int(srri);
-    black_box_pack_char(' ');
-
-	/*----- atitude ---------------------*/
-	black_box_pack_int((int)(AHRS.roll*100));
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(roll_desired*100));
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(AHRS.pitch*100));// cm
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(pitch_desired*100));
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(AHRS.yaw*100));
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(AHRS.yaw_rate*100));
-	black_box_pack_char(' ');
-
-	/*------- GPS ----------------------*/
-	int16_t vx = _gps.velocity[0];  // cm/s
-    int16_t vy = _gps.velocity[1];  // cm/s
-    int16_t vz = _gps.velocity[2];  // cm/s
-    int32_t ground_speed = sqrt(sq(vx) + sq(vy)) ;
-
-	black_box_pack_int(_gps.position[0]);
-	black_box_pack_char(' ');
-	black_box_pack_int(_gps.position[1]);
-	black_box_pack_char(' ');
-	black_box_pack_int(_gps.altitude_msl);
-	black_box_pack_char(' ');
-	black_box_pack_int(_gps.altitude_mgl);
-	black_box_pack_char(' ');
-	black_box_pack_int(_gps.numSat);
-	black_box_pack_char(' ');
-	black_box_pack_int(_gps.fix);
-	black_box_pack_char(' ');
-	black_box_pack_int(ground_speed);
-	black_box_pack_char(' ');
-	black_box_pack_int(vz);
-
-	/*---- estimate ---------------------------*/
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(alt_estimate*100)); //cm
-	black_box_pack_char(' '); 
-	black_box_pack_int((int)(climb_rate*100));   // cm/s
-	black_box_pack_char(' '); 
-	black_box_pack_int(alt_baro);   // cm
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(velocity_abs*100));   // cm
-
-	black_box_pack_char(' ');
-	black_box_pack_int((int)(pid_velo_scale*1000));   // cm
-
-	/*----- end line && load data to sd card- -----*/
-	sdcard_fsize = black_box_get_file_size();
-	black_box_pack_char('\n');
-	black_box_load();
-
-	write_time = micros() - current_time;
-	if(write_time > 10 && puts_state != -1){
-	   HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-	}
+    /* if error init again */
+	if(puts_state == -1){
+	   error_count ++;
+	   HAL_SD_Init(&hsd);
+	   black_box_init();
+	 }
 
 	vTaskDelayUntil( &xLastWakeTime, xFrequency);
 #ifdef STACK_DEBUG

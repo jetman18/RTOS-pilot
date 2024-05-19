@@ -64,11 +64,11 @@ void attitude_ctrl_init(){
    speed_filter_reset = TRUE;
    ab_speed_filted = 0.0f;
    // init pid 
-   pid_init(&roll_angle_pid, pid_file_1.roll_angle_Kp,0,0,5,0,0);
+   pid_init(&roll_angle_pid, pid_file_1.roll_angle_Kp,0,0,10,0,0);
    pid_init(&roll_rate_pid, pid_file_1.roll_rate_Kp, pid_file_1.roll_rate_Ki, pid_file_1.roll_rate_Kd,
             pid_file_1.roll_fcut_err  , pid_file_1.roll_f_cut_rate_D, pid_file_1.roll_max_I);
 
-   pid_init(&pitch_angle_pid, pid_file_1.pitch_angle_Kp,0,0,5,0,0);
+   pid_init(&pitch_angle_pid, pid_file_1.pitch_angle_Kp,0,0,10,0,0);
    pid_init(&pitch_rate_pid,pid_file_1.pitch_rate_Kp,pid_file_1.pitch_rate_Ki,pid_file_1.pitch_rate_Kd,
             pid_file_1.roll_fcut_err,  pid_file_1.pitch_f_cut_rate_D,pid_file_1.pitch_max_I);
 }
@@ -133,7 +133,8 @@ void attitude_ctrl(const uint32_t micros){
     const float pid_pitch_vel_scale = constrainf(pid_velo_scale,MIN_PID_SPEED_SCALE + 0.2,MAX_PID_SPEED_SCALE);
 
     // stabilize mode
-    if(ibusChannelData[CH5] > CHANNEL_HIGH ){
+   // if(ibusChannelData[CH5] > CHANNEL_HIGH )
+    if(0){
         /*----- roll axis pid   -----*/
         float roll_rate_desired =  pid_calculate(&roll_angle_pid,roll_measurement,roll_desired,1.0f,dt);
         // limit rate

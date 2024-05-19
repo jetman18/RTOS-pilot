@@ -85,6 +85,7 @@ typedef struct {
     uint32_t uptime;            // milliseconds
 } ubx_nav_status;
 
+/*
 typedef struct {
     uint32_t time;
     int32_t time_nsec;
@@ -104,6 +105,17 @@ typedef struct {
     uint8_t satellites;
     uint32_t res2;
 } ubx_nav_solution;
+*/
+typedef struct
+{
+    uint32_t time;
+    uint8_t version;
+    uint8_t numSvs;
+    
+    /* data */
+}ubx_nav_sat;
+
+
 
 typedef struct {
     uint32_t time;              // GPS msToW
@@ -145,12 +157,12 @@ static uint8_t _msg_id;
 uint16_t _payload_length;
 uint16_t _payload_counter;
 
-int32_t terrain_altitude;
+int32_t offset_alt;
 int8_t gps_alt_zero_calibrate;
 static union {
     ubx_nav_posllh posllh;
     ubx_nav_status status;
-    ubx_nav_solution solution;
+    //ubx_nav_solution solution;
     ubx_nav_velned velned;
     //ubx_nav_svinfo svinfo;
     uint8_t bytes[UBLOX_BUFFER_SIZE];
@@ -166,7 +178,7 @@ static uint8_t parse_msg();
  */
 void gps_init(UART_HandleTypeDef *uart,uint32_t baudrate)
 {
-    terrain_altitude = 0;
+    offset_alt = 0;
     gps_alt_zero_calibrate = FALSE;
 	_gpsUartPort = uart;
     _gps.timer_ = millis();
@@ -174,18 +186,25 @@ void gps_init(UART_HandleTypeDef *uart,uint32_t baudrate)
     _payload_length = 0;
     _payload_counter = 0;
     _msg_id = 0;
-
-    // Configuration _gps module
-    HAL_UART_Transmit(_gpsUartPort,ubloxInit,sizeof(ubloxInit),1000);
-    HAL_Delay(10);
-    HAL_UART_Transmit(_gpsUartPort,ubloxSbasInit,sizeof(ubloxSbasInit),1000);
-    HAL_Delay(10);
-    HAL_UART_Transmit(_gpsUartPort,uart57600,sizeof(uart57600),1000);
-    HAL_Delay(10);
     // set baudrate
     _gpsUartPort->Init.BaudRate = baudrate;
-	HAL_UART_Init(_gpsUartPort); 
+	HAL_UART_Init(_gpsUartPort);
+    HAL_Delay(2);
+    /* disable NMEA */
+    HAL_UART_Transmit(_gpsUartPort,disable_NMEA_MSG,sizeof(disable_NMEA_MSG),1000);
+    HAL_Delay(2);
 
+    /* enable UBX */
+    HAL_UART_Transmit(_gpsUartPort,enable_UBX_MSG,sizeof(enable_UBX_MSG),1000);
+    HAL_Delay(2);
+
+     /* set 10hz rate */
+    HAL_UART_Transmit(_gpsUartPort,set_rate_10hz,sizeof(set_rate_10hz),1000);
+    HAL_Delay(2);
+    
+     /* enable SBAS */
+    //HAL_UART_Transmit(_gpsUartPort,ubloxSbas,sizeof(ubloxSbas),1000);
+    //HAL_Delay(2);
     // read gps using interrup
 	HAL_UART_Receive_IT(_gpsUartPort, &_char,ONE_BYTE);
 }
@@ -249,7 +268,7 @@ static uint8_t parse_msg(){
             _gps.position[LAT] = _buffer.posllh.latitude;
             if(gps_alt_zero_calibrate == FALSE){
                 if(gps_cali_count < 20){
-                    terrain_altitude += _buffer.posllh.altitude_msl;
+                    offset_alt += _buffer.posllh.altitude_msl;
                     gps_cali_count ++;
                 }
                 else{
@@ -257,9 +276,9 @@ static uint8_t parse_msg(){
                 }
             }
             else{
-               _gps.altitude_mgl = _buffer.posllh.altitude_msl - terrain_altitude/20; 
+               _gps.altitude_mgl = _buffer.posllh.altitude_msl - offset_alt/20; 
             }
-            _gps.altitude_msl = _buffer.posllh.altitude_msl - terrain_altitude; 
+            _gps.altitude_msl = _buffer.posllh.altitude_msl - offset_alt; 
             _gps.horizontalAccuracy = _buffer.posllh.horizontal_accuracy;
             _gps.VerticalAccuracy = _buffer.posllh.vertical_accuracy;
             /* time update position */
@@ -278,13 +297,15 @@ static uint8_t parse_msg(){
             //    _gps.fix = FALSE;
             _gps.fix = _buffer.status.fix_type;
             break;
+        /*
         case MSG_SOL:
             //next_fix = (_buffer.solution.fix_status & NAV_STATUS_FIX_VALID) && (_buffer.solution.fix_type == FIX_3D);
             //if (!next_fix)
             //    _gps.fix = FALSE;
-            _gps.fix = _buffer.solution.fix_type;
-            _gps.numSat = _buffer.solution.satellites;
+            _gps.fix = _buffer.solution.fix_type; --------------------------------------------------------------------------------------
+            _gps.numSat = _buffer.solution.satellites; -------------------------------------------------------------------------------------
             break;
+        */
         case MSG_VELNED:
             _gps.velocity[LAT] = _buffer.velned.ned_north;
             _gps.velocity[LON] = _buffer.velned.ned_east;

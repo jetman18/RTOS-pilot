@@ -76,7 +76,7 @@ static float circleFly(uint32_t lat,uint32_t lon,uint32_t radius)
      yaw_target = range360(yaw_target);
      return yaw_target;
 }
-static float waypointFolow(){
+static float waypointFollow(){
    static float Kc = 0.22;
    static float Kd = 1;
    static uint8_t wp_count;

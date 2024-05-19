@@ -45,7 +45,7 @@ static pid_profile_t pid_file_1={
     .max_servo = 2000,
     .min_servo = 1000,
 
-    .roll_rate_limit = 80,
+    .roll_rate_limit = 180,
     .roll_FF_gain = 1.2f,
 
     .roll_fcut_err = 5,
@@ -72,7 +72,6 @@ static pid_profile_t pid_file_1={
     .pitch_pid_fcut = 5,
     .pitch_max_pid  = 500
 };
-
 
 /*
 static pid_profile_t pid_file_2={
