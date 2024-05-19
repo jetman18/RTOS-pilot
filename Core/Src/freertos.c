@@ -331,12 +331,14 @@ void blackbox(void const * argument)
 		black_box_pack_char('\n');
 		black_box_load();
     }else{
+    	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4,GPIO_PIN_RESET);
     	black_box_reset = TRUE;
     }
     /* if error init again */
 	if(puts_state == -1){
 	   error_count ++;
-	   HAL_SD_Init(&hsd);
+	   //HAL_SD_Init(&hsd);
+	   HAL_SD_InitCard(&hsd);
 	   black_box_init();
 	 }
 
@@ -383,7 +385,7 @@ void led_indicate(void const * argument)
 	stack_task_led = uxTaskGetStackHighWaterMark( NULL );
 #endif
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    osDelay(100);
+    osDelay(1000);
   }
   /* USER CODE END led_indicate */
 }

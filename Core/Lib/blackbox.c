@@ -25,15 +25,15 @@ static int Float_to_string(float f, uint8_t places, char strOut[]);
 FRESULT mount_state;
 FRESULT open_state;
 int32_t puts_state;
+
 /*
  * init black box
  */
 void black_box_init(){
 	fs.file = &SDFile;
-    mount_state = f_mount(&SDFatFS,"",1);
     SDFile.fs->id = 1;
     SDFile.id = 1;
-    //memset(&SDFile,0,sizeof(FIL));
+    mount_state = f_mount(&SDFatFS,"",1);
     open_state = f_open(&SDFile,"flight.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
     f_lseek (&SDFile,SDFile.fsize);
 }
