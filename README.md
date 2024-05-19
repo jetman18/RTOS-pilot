@@ -24,7 +24,7 @@ Flight controller for fixed-wing uav
 
 <img  src="./images/3dmode.png" alt="img-name" width="500" height="300"> 
 
-### Prototye
+### Prototype
 <img  src="./images/fc1.jpg" alt="img-name" width="500" height="350">
 
 ### Uav
