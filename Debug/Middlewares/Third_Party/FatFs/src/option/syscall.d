@@ -48,7 +48,7 @@ Middlewares/Third_Party/FatFs/src/option/syscall.o: \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
- ../FATFS/Target/bsp_driver_sd.h
+ ../FATFS/Target/bsp_driver_sd.h ../FATFS/Target/fatfs_platform.h
 ../Middlewares/Third_Party/FatFs/src/option/../ff.h:
 ../Middlewares/Third_Party/FatFs/src/option/../integer.h:
 ../FATFS/Target/ffconf.h:
@@ -99,3 +99,4 @@ Middlewares/Third_Party/FatFs/src/option/syscall.o: \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h:
 ../FATFS/Target/bsp_driver_sd.h:
+../FATFS/Target/fatfs_platform.h:

@@ -41,35 +41,35 @@ typedef struct
 
 }pid_profile_t;
 
-static pid_profile_t pid_file_1={
+static pid_profile_t pid_profile_1={
     .max_servo = 2000,
     .min_servo = 1000,
 
     .roll_rate_limit = 180,
     .roll_FF_gain = 1.2f,
 
-    .roll_fcut_err = 5,
+    .roll_fcut_err = 10,
     .roll_angle_Kp = 2,
     .roll_rate_Kp  = 1.1,
     .roll_rate_Ki  = 1.5,
     .roll_rate_Kd  = 0,
     .roll_f_cut_rate_D = 0,
     .roll_max_I = 150,
-    .roll_pid_fcut = 5,
+    .roll_pid_fcut = 40,
     .roll_max_pid  = 400,
 
     // pitch axis
     .pitch_rate_limit = 180,
-    .pitch_FF_gain = 1,
+    .pitch_FF_gain = 1.0f,
 
-    .pitch_fcut_err = 5,
-    .pitch_angle_Kp = 3,
-    .pitch_rate_Kp  = 1.5,
+    .pitch_fcut_err = 10,
+    .pitch_angle_Kp = 2.1,
+    .pitch_rate_Kp  = 1.2,
     .pitch_rate_Ki  = 1.5,
     .pitch_rate_Kd  = 0,
     .pitch_f_cut_rate_D = 0,
     .pitch_max_I = 150,
-    .pitch_pid_fcut = 5,
+    .pitch_pid_fcut = 40,
     .pitch_max_pid  = 500
 };
 

@@ -31,8 +31,8 @@ int32_t puts_state;
  */
 void black_box_init(){
 	fs.file = &SDFile;
-    SDFile.fs->id = 1;
-    SDFile.id = 1;
+    //SDFile.fs->id = 1;
+    //SDFile.id = 1;
     mount_state = f_mount(&SDFatFS,"",1);
     open_state = f_open(&SDFile,"flight.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
     f_lseek (&SDFile,SDFile.fsize);

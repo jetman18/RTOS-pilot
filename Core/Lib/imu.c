@@ -15,8 +15,8 @@
 #define OFFSET_CYCLE  1000
 #define USE_MAG 1
 
-float velocity_test;
-float position_test;
+float velocity_test = 0;
+float position_test = 0;
 
 attitude_t AHRS;
 float integralFBx;
@@ -221,7 +221,6 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     }
 
 	//position_test += velocity_test*0.01f + 0.5* acc_Eframe[Z]* 0.01f * 0.01f;
-
 	//velocity_test += acc_Eframe[Z]*0.01f;
 
 	AHRS.pitch = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]))*DEG;

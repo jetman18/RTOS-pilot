@@ -3,20 +3,11 @@
 #include "../Lib/utils.h"
 #include "../Lib/timer.h"
 #include "plane.h"
-/*
-#define toDEG (180/3.14159265359f)
-#define toRAD (3.14159265359f/180)
-#define  EARTH_RADIUS  6356752  //m
-#define MAX_WAYPOINT 30
-#define STICK_CHECK(x)  ((x > 1600)?1:0)
+
+#define  EARTH_RADIUS  6356752 
+#define IS_STICK_TURN_ON(x)  ((x > 1600)?1:0)
 
 #define CRICLE_RADIUS 100  // m
-
-typedef struct{
-  void* func;
-  uint8_t priority;
-  uint8_t init;
-}flymode;
 
 typedef enum{
   NULL_WP = 0,
@@ -32,6 +23,7 @@ typedef struct{
   int8_t Type;
 }waypoint;
 
+
 static int32_t home_latitude;
 static int32_t home_longitude;
 static int32_t loiter_latitude;
@@ -39,7 +31,6 @@ static int32_t loiter_longitude;
 static int32_t latitude_g;
 static int32_t longitude_g;
 static int wp_init = 1;
-waypoint wp[MAX_WAYPOINT];
 static int wp_index = 0;
 
 uint8_t  autopilot_priority = 0;
@@ -49,33 +40,25 @@ uint16_t autopilot_stick;
 uint16_t circle_stick;
 uint16_t rtHome_stick;
 
-static float circleFly();
-static float waypointFlow();
+
 static float waypointBearing(int lat1,int lon1,int lat2, int lon2);
 static int distanceBetweenTwoPoint(int lat1,int lon1,int lat2, int lon2);
-static void rtHome();
 
-//
-// 3 main mode
-flymode modef[]={
-   {waypointFlow, 0 },
-   {circleFly   , 1 },
-   {rtHome      , 2 }
-};
-//
-static void rtHome(){
-}
+/*
 
-static float circleFly(uint32_t lat,uint32_t lon,uint32_t radius)
+static float loiter(uint32_t aircraf_lat,uint32_t aircraf_lon,uint32_t radius_desired)
 {    
-     int crossTrack = distanceBetweenTwoPoint(latitude_g,longitude_g,loiter_latitude,loiter_longitude);
-     crossTrack = crossTrack - CRICLE_RADIUS;
+   // caculate distance to circle
+     int dist = distanceBetweenTwoPoint(latitude_g,longitude_g,loiter_latitude,loiter_longitude);
+     dist = dist - CRICLE_RADIUS;
      float Kc = 500.0f/CRICLE_RADIUS;
      float bearing = waypointBearing(latitude_g,longitude_g,loiter_latitude,loiter_longitude);
      float yaw_target = bearing + 90.0f - MAX(fabs(crossTrack*Kc),90)*sign(crossTrack);
      yaw_target = range360(yaw_target);
      return yaw_target;
 }
+*/
+/*
 static float waypointFollow(){
    static float Kc = 0.22;
    static float Kd = 1;
@@ -114,6 +97,11 @@ static float waypointFollow(){
    theta = range360(theta);
    return theta;
 }
+*/
+
+
+/* Start autopilot mode
+**/
 void autoPilot(){
    static uint32_t timer;
    uint32_t dt = millis() - timer;
@@ -136,7 +124,7 @@ void autoPilot(){
 
 }
 
-
+/*
 static float waypointBearing(int lat1,int lon1,int lat2, int lon2){
      float tem = toRAD*EARTH_RADIUS/(1e+7f);
      float dx = (lat2 - lat1)/(1e+7f)*tem;
@@ -156,9 +144,9 @@ static float waypointBearing(int lat1,int lon1,int lat2, int lon2){
 }
 
 static int distanceBetweenTwoPoint(int lat1,int lon1,int lat2, int lon2){
-   float tem = toRAD*EARTH_RADIUS/(1e+7f);
-   float a_temp =  (lat2 - lat1)*tem;
-   float b_temp =  (lon2 - lon1)*tem;
+   float scaler = RAD*EARTH_RADIUS/(1e+7f);
+   float a_temp =  (lat2 - lat1)*scaler;
+   float b_temp =  (lon2 - lon1)*scaler;
    int dis = sqrtf(a_temp*a_temp + b_temp*b_temp);
    return dis;
 }

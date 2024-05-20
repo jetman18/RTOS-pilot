@@ -5,13 +5,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../FATFS/Target/bsp_driver_sd.c 
+../FATFS/Target/bsp_driver_sd.c \
+../FATFS/Target/fatfs_platform.c 
 
 OBJS += \
-./FATFS/Target/bsp_driver_sd.o 
+./FATFS/Target/bsp_driver_sd.o \
+./FATFS/Target/fatfs_platform.o 
 
 C_DEPS += \
-./FATFS/Target/bsp_driver_sd.d 
+./FATFS/Target/bsp_driver_sd.d \
+./FATFS/Target/fatfs_platform.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -21,7 +24,7 @@ FATFS/Target/%.o FATFS/Target/%.su FATFS/Target/%.cyclo: ../FATFS/Target/%.c FAT
 clean: clean-FATFS-2f-Target
 
 clean-FATFS-2f-Target:
-	-$(RM) ./FATFS/Target/bsp_driver_sd.cyclo ./FATFS/Target/bsp_driver_sd.d ./FATFS/Target/bsp_driver_sd.o ./FATFS/Target/bsp_driver_sd.su
+	-$(RM) ./FATFS/Target/bsp_driver_sd.cyclo ./FATFS/Target/bsp_driver_sd.d ./FATFS/Target/bsp_driver_sd.o ./FATFS/Target/bsp_driver_sd.su ./FATFS/Target/fatfs_platform.cyclo ./FATFS/Target/fatfs_platform.d ./FATFS/Target/fatfs_platform.o ./FATFS/Target/fatfs_platform.su
 
 .PHONY: clean-FATFS-2f-Target
 

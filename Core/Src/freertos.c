@@ -239,8 +239,10 @@ void blackbox(void const * argument)
 {
   /* USER CODE BEGIN blackbox */
 
-	//vTaskSuspend(NULL);
+	vTaskSuspend(NULL);
+	//__disable_irq();
 	black_box_init();
+	//__enable_irq();
 	black_box_reset = TRUE;
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 100;  // 25 ms
@@ -338,8 +340,8 @@ void blackbox(void const * argument)
 	if(puts_state == -1){
 	   error_count ++;
 	   //HAL_SD_Init(&hsd);
-	   HAL_SD_InitCard(&hsd);
-	   black_box_init();
+	   //HAL_SD_InitCard(&hsd);
+	   //black_box_init();
 	 }
 
 	vTaskDelayUntil( &xLastWakeTime, xFrequency);
