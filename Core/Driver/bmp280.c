@@ -2,7 +2,7 @@
 #include "bmp280.h"
 #include "math.h"
 #include "../Lib/timer.h"
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 /**
  * BMP280 registers
  */

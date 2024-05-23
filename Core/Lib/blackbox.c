@@ -35,11 +35,11 @@ void black_box_init(){
     //SDFile.id = 1;
     mount_state = f_mount(&SDFatFS,"",1);
     open_state = f_open(&SDFile,"flight.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
-    f_lseek (&SDFile,SDFile.fsize);
+    f_lseek (&SDFile,SDFile.obj.objsize);
 }
 
 uint32_t black_box_get_file_size(){
-    return SDFile.fsize;
+    return 0;//SDFile.fsize;
 }
 
 void black_box_pack_float(float val,uint8_t digit_after_point ){

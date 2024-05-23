@@ -1,7 +1,7 @@
 #include "gps.h"
 #include "math.h"
 #include "string.h"
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include "stdio.h"
 #include "timer.h"
 #include "gpsconfig.h"
@@ -13,7 +13,6 @@
 #define LAT   1
 #define DOWN  2
 #define UBLOX_BUFFER_SIZE 200
-#define ONE_BYTE  1
 
 /* Using Ubx protocol
 * 
@@ -149,13 +148,14 @@ typedef struct {
 } ubx_nav_svinfo;
 
 gpsData_t _gps;
-UART_HandleTypeDef *_gpsUartPort;
-static uint8_t _char;
+static UART_HandleTypeDef *_gpsUartPort;
 uint32_t _therad_read_time_ms;
 // State machine state
 static uint8_t _msg_id;
 uint16_t _payload_length;
 uint16_t _payload_counter;
+static int8_t receive_cplt = 1;
+uint8_t gps_buffer[UBLOX_BUFFER_SIZE];
 
 int32_t offset_alt;
 int8_t gps_alt_zero_calibrate;
@@ -171,7 +171,6 @@ static union {
 
 static uint8_t newdata(uint8_t data);
 static uint8_t parse_msg();
-
 
 /*  
  * Init function 
@@ -189,61 +188,72 @@ void gps_init(UART_HandleTypeDef *uart,uint32_t baudrate)
     // set baudrate
     _gpsUartPort->Init.BaudRate = baudrate;
 	HAL_UART_Init(_gpsUartPort);
-    HAL_Delay(2);
+    HAL_Delay(1000);
     /* disable NMEA */
-    HAL_UART_Transmit(_gpsUartPort,disable_NMEA_MSG,sizeof(disable_NMEA_MSG),1000);
-    HAL_Delay(2);
+    for(int i = 0;i< 3; i++){
+    	HAL_UART_Transmit(_gpsUartPort,disable_NMEA_MSG,sizeof(disable_NMEA_MSG),1000);
+    	HAL_Delay(10);
+    }
 
     /* enable UBX */
-    HAL_UART_Transmit(_gpsUartPort,enable_UBX_MSG,sizeof(enable_UBX_MSG),1000);
-    HAL_Delay(2);
+    for(int i = 0;i< 3; i++){
+        HAL_UART_Transmit(_gpsUartPort,enable_UBX_MSG,sizeof(enable_UBX_MSG),1000);
+        HAL_Delay(10);
+    }
 
-     /* set 10hz rate */
-    HAL_UART_Transmit(_gpsUartPort,set_rate_10hz,sizeof(set_rate_10hz),1000);
-    HAL_Delay(2);
-    
-     /* enable SBAS */
-    //HAL_UART_Transmit(_gpsUartPort,ubloxSbas,sizeof(ubloxSbas),1000);
+     /* set max rate */
+    //HAL_UART_Transmit(_gpsUartPort,set_rate_10hz,sizeof(set_rate_10hz),1000);
     //HAL_Delay(2);
+    for(int i = 0;i< 3; i++){
+    	HAL_UART_Transmit(_gpsUartPort,set_rate_50hz,sizeof(set_rate_50hz),1000);
+    	HAL_Delay(10);
+    }
     // read gps using interrup
-	HAL_UART_Receive_IT(_gpsUartPort, &_char,ONE_BYTE);
+	//HAL_UART_Receive_IT(_gpsUartPort, &_char,1);
 }
 
 UART_HandleTypeDef *gps_uart_port(){
     return _gpsUartPort;
 }
 
-const uint32_t thread_timeout_us = 500; // timeout 500us
-const uint32_t thread_max_wait_time_us = 1000; // timeout 500us
-void gps_thread(){
-   // uint32_t current_time_ms = millis();
-    while(1)
-    {
-        uint8_t read_f = HAL_UART_Receive(_gpsUartPort, &_char,ONE_BYTE,thread_timeout_us);
-        if(read_f == HAL_OK){
-            if(newdata(_char)){
-                // parse msg when read
-                parse_msg();
-                break;
+
+uint8_t gps_thread_count;
+uint32_t ms_gps_thread;
+/*
+* Parse gps buffer read by DMA
+**/
+void gps_readout(){
+    uint8_t buffer_index = 0;
+    gps_thread_count ++;
+    if(receive_cplt){
+        while(1){
+            newdata(gps_buffer[buffer_index++]);
+            if(buffer_index >= UBLOX_BUFFER_SIZE){
+            	 break;
             }
         }
-        else{
-            break;
-        }
-           
+        HAL_UART_Receive_DMA(_gpsUartPort,gps_buffer,UBLOX_BUFFER_SIZE);
+        receive_cplt = 0;
     }
-
 }
 
-uint32_t gps_interrupt_count;
+uint8_t gps_count_ = 0;  // check call interrupt
+void gps_DMA_callback()
+{
+    static uint32_t last_call;
+    ms_gps_thread = millis() - last_call;
+    last_call = millis();
+	gps_count_ ++;
+    receive_cplt = 1;
+}
+
+/*
 void gps_callback()
 {
-   // parse data
-   gps_interrupt_count++;
-   newdata(_char);
-   HAL_UART_Receive_IT(_gpsUartPort, &_char,ONE_BYTE);
+    newdata(c);
+    HAL_UART_Receive_IT(_gpsUartPort,&c,1);
 }
-
+*/
 
 
 /*
@@ -256,14 +266,21 @@ static void _update_checksum(uint8_t *data, uint8_t len, uint8_t *ck_a, uint8_t 
     }
 }
 */
+
+uint32_t ms_posllh;
+uint32_t ms_status;
+uint32_t ms_velned;
+
 static uint8_t parse_msg(){
     static uint8_t _new_speed;
-    //static uint8_t next_fix;
     static uint32_t lastPosUpdateTime;
     static uint8_t _new_position;
     static uint8_t gps_cali_count = 0;
     switch (_msg_id) {
         case MSG_POSLLH:
+        	 static uint32_t c_time_ms_posllh = 0;
+        	 ms_posllh = millis() - c_time_ms_posllh;
+        	 c_time_ms_posllh = millis();
             _gps.position[LON] = _buffer.posllh.longitude;
             _gps.position[LAT] = _buffer.posllh.latitude;
             if(gps_alt_zero_calibrate == FALSE){
@@ -283,8 +300,8 @@ static uint8_t parse_msg(){
             _gps.VerticalAccuracy = _buffer.posllh.vertical_accuracy;
             /* time update position */
             if(lastPosUpdateTime == 0){
-                break;
                 lastPosUpdateTime = millis();
+                break;
             }
             _gps.posUpdateTime = millis() - lastPosUpdateTime;
             lastPosUpdateTime = millis();
@@ -292,6 +309,9 @@ static uint8_t parse_msg(){
             _new_position = TRUE;
             break;
         case MSG_STATUS:
+			static uint32_t c_time_ms_status = 0;
+			ms_status = millis() - c_time_ms_status;
+			c_time_ms_status = millis();
             //next_fix = (_buffer.status.fix_status & NAV_STATUS_FIX_VALID) && (_buffer.status.fix_type == FIX_3D);
             //if (!next_fix)
             //    _gps.fix = FALSE;
@@ -307,6 +327,9 @@ static uint8_t parse_msg(){
             break;
         */
         case MSG_VELNED:
+			 static uint32_t c_time_ms_velned = 0;
+			 ms_velned = millis() - c_time_ms_velned;
+			 c_time_ms_velned = millis();
             _gps.velocity[LAT] = _buffer.velned.ned_north;
             _gps.velocity[LON] = _buffer.velned.ned_east;
             _gps.velocity[DOWN] = _buffer.velned.ned_down;
@@ -342,13 +365,11 @@ static uint8_t parse_msg(){
     return FALSE;
 }
 
-int parse_ok;
 static uint8_t newdata(uint8_t data){
     uint8_t parsed = FALSE;
     static uint8_t _ck_a;
     static uint8_t _ck_b;
     static uint8_t _step = 0;
-    static uint32_t current_time_ms = 0;
     switch (_step) {
         case 0: // Sync char 1 (0xB5)
             if (PREAMBLE1 == data)
@@ -400,9 +421,7 @@ static uint8_t newdata(uint8_t data){
             _step = 0;
             if (_ck_b != data)
                 break;   
-			 _therad_read_time_ms = micros() - current_time_ms;
-			 current_time_ms = micros();
-            if (parse_msg())
+            if(parse_msg())
             {
                 parsed = TRUE;
             }

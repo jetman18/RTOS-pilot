@@ -1,7 +1,7 @@
 #include "mpu6050.h"
 #include "i2c.h"
 #include "../Lib/axis.h"
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include "gpio.h"
 #include "stdlib.h"
 
@@ -33,7 +33,7 @@
 #endif
 
 
-I2C_HandleTypeDef *i2c;
+static I2C_HandleTypeDef *i2c;
 static int8_t isConnected;
 
 typedef enum{

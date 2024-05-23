@@ -5,7 +5,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include "fatfs.h"
 
 void black_box_init();

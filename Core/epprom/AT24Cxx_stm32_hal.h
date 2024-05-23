@@ -29,13 +29,13 @@
 #ifndef __AT24CXX_STM32_HAL_H_
 #define __AT24CXX_STM32_HAL_H_
 
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 
 #define STM_I2C_PORT			hi2c2
 #define AT24Cxx_BASE_ADDR_R		0xA1
 #define AT24Cxx_BASE_ADDR_W		0xA0
 #define AT24Cxx_SET_ADDR		0x07
-#define AT24Cxx_USED_MODEL		AT24C512
+#define AT24Cxx_USED_MODEL		AT24C256
 
 #define AT24Cxx_I2C_TIMOUT		1000
 

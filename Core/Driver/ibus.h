@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 
 enum index{
 	CH1 = 0,

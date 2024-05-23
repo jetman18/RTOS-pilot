@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include "../Lib/axis.h"
 
 void mpu6050_gyro_get_raw(axis3_t *raw);

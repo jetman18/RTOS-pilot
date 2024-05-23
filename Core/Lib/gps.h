@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 
 typedef struct{
     int32_t   position[2]; // *10^7
@@ -27,7 +27,9 @@ typedef struct{
 extern gpsData_t _gps;
 UART_HandleTypeDef *gps_uart_port();
 void gps_init(UART_HandleTypeDef *uartt,uint32_t baudrate);
-void gps_callback(void);
+void gps_readout();
+void gps_DMA_callback();
+void gps_callback();
 #ifdef __cplusplus
 }
 #endif

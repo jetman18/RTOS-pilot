@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include "../Lib/timer.h"
 extern SD_HandleTypeDef hsd;
 #include "bsp_driver_sd.h"

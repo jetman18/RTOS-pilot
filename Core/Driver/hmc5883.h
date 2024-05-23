@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #include "../lib/axis.h"
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 
 typedef struct{
     int16_t mx;

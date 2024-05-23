@@ -1,5 +1,5 @@
 #include "imu.h"
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include "maths.h"
 #include "math.h"
 #include "filter.h"
@@ -35,6 +35,9 @@ float cosx,cosy,cosz,sinx,siny, sinz,tany;
 
 uint8_t isGyrocalibrated = FALSE;
 uint32_t init_us;
+
+float pitch_trim_imu = 3.14;
+float roll_trim_imu = 0;
 
 //IMU configuration parameters
 imu_config_t config ={
@@ -86,7 +89,7 @@ void get_Acc_Angle(euler_t *m)
 
 static int8_t reset_state = 1;
 // mahony filter
-void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t accy_, int16_t accz_,int16_t magx,int16_t magy,int16_t magz,uint32_t micros){
+void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t accy_, int16_t accz_,int16_t magx,int16_t magy,int16_t magz,const float dt){
 	float norm;
 	float ex, ey, ez;
     float gx,gy,gz;
@@ -95,9 +98,6 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     float emz,wx,wy;
     float mx,my,mz,hx,hy,bx,bz;
 
-    static uint32_t last_time_us;
-    float dt = (micros - last_time_us)*(1e-6f);
-    last_time_us = micros;
 
 	gx = (gx_/config.gyr_lsb) * RAD;
 	gy = (gy_/config.gyr_lsb) * RAD;
@@ -220,11 +220,11 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     	acc_Eframe[Z] = 0;
     }
 
-	//position_test += velocity_test*0.01f + 0.5* acc_Eframe[Z]* 0.01f * 0.01f;
-	//velocity_test += acc_Eframe[Z]*0.01f;
+	position_test += velocity_test*0.01f + 0.5* acc_Eframe[Z]* 0.01f * 0.01f;
+	velocity_test += acc_Eframe[Z]*0.01f;
 
-	AHRS.pitch = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]))*DEG;
-	AHRS.roll = -atan2_approx(-dcm[1][2],dcm[2][2])*DEG;
+	AHRS.pitch = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]))*DEG;// - pitch_trim_imu;
+	AHRS.roll = -atan2_approx(-dcm[1][2],dcm[2][2])*DEG;//  - roll_trim_imu;
 	float yaw_ = -atan2_approx(dcm[0][1],dcm[0][0])*DEG;
 	if(yaw_ < 0){
 		 yaw_ = 360 + yaw_;

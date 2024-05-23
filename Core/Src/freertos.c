@@ -39,6 +39,7 @@
 #include "../Lib/maths.h"
 #include "../Lib/blackbox.h"
 #include "../Lib/baro.h"
+#include "../Lib/timer.h"
 
 
 #include "../Driver/ibus.h"
@@ -48,9 +49,6 @@
 #include "../Driver/bmp280.h"
 
 #include "../flight/plane.h"
-
-
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,36 +74,18 @@ osThreadId task1Handle;
 osThreadId task2Handle;
 osThreadId task3Handle;
 osThreadId task4Handle;
-osThreadId task5Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
 
-void ahrs_task(void const * argument);
-void blackbox(void const * argument);
-void led_indicate(void const * argument);
-void read_sensor(void const * argument);
-void mavlinkOSD(void const * argument);
+void blackbox_task(void const * argument);
+void ahrs_ctrl_task(void const * argument);
+void imu_sensor_task(void const * argument);
+void osd_task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
-
-/* GetIdleTaskMemory prototype (linked to static allocation support) */
-void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
-
-/* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
-static StaticTask_t xIdleTaskTCBBuffer;
-static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
-
-void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
-{
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
-  *ppxIdleTaskStackBuffer = &xIdleStack[0];
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-  /* place for user code */
-}
-/* USER CODE END GET_IDLE_TASK_MEMORY */
 
 /**
   * @brief  FreeRTOS initialization
@@ -114,7 +94,8 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-	 timer_start(&htim7);
+  timer_start(&htim4);
+  gps_init(&huart3,115200);
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -135,24 +116,20 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of task1 */
-  osThreadDef(task1, ahrs_task, osPriorityHigh, 0, 200);
+  osThreadDef(task1, blackbox_task, osPriorityLow, 0, 512);
   task1Handle = osThreadCreate(osThread(task1), NULL);
 
   /* definition and creation of task2 */
-  osThreadDef(task2, blackbox, osPriorityLow, 0, 512);
+  osThreadDef(task2, ahrs_ctrl_task, osPriorityHigh, 0, 256);
   task2Handle = osThreadCreate(osThread(task2), NULL);
 
   /* definition and creation of task3 */
-  osThreadDef(task3, led_indicate, osPriorityLow, 0, 128);
+  osThreadDef(task3, imu_sensor_task, osPriorityRealtime, 0, 128);
   task3Handle = osThreadCreate(osThread(task3), NULL);
 
   /* definition and creation of task4 */
-  osThreadDef(task4, read_sensor, osPriorityRealtime, 0, 128);
+  osThreadDef(task4, osd_task, osPriorityLow, 0, 128);
   task4Handle = osThreadCreate(osThread(task4), NULL);
-
-  /* definition and creation of task5 */
-  osThreadDef(task5, mavlinkOSD, osPriorityNormal, 0, 128);
-  task5Handle = osThreadCreate(osThread(task5), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -160,62 +137,18 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_ahrs_task */
-/********** stack check ********/
+/* USER CODE BEGIN Header_blackbox_task */
+
 #define STACK_DEBUG
 #ifdef STACK_DEBUG
 uint16_t stack_task_ahrs;
-uint16_t stack_task_led;
 uint16_t stack_task_sensor;
 uint16_t stack_task_mavOSD;
 uint16_t stack_task_blackbox;
 #endif
 /***************************/
-int32_t alt_baro;
-int16_t gyro_imu[3];
-int16_t acc_imu[3];
-int16_t mag_raw[3];
-uint8_t black_box_reset;
-/**
-  * @brief  Function implementing the task1 thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_ahrs_task */
-void ahrs_task(void const * argument)
-{
-  /* USER CODE BEGIN ahrs_task */
-	ibus_init(&huart2);
-	gps_init(&huart3,115200);
-	attitude_ctrl_init();
-	initPWM(&htim3);
-    baro_init();
-	TickType_t xLastWakeTime;
-	const TickType_t xFrequency = 10; // 100 hz loop
-	xLastWakeTime = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4); // for debug
-	//timer_calculate_boottime();
-    if(is_baro_calibration() == FALSE){
-		baro_zero_calibrate();
-	}
-    alt_baro = baro_get_altitude();
-    ibusFrameComplete();
-    update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],micros());
-    attitude_ctrl(micros());
 
-    //vTaskSuspend(NULL);
-    vTaskDelayUntil( &xLastWakeTime, xFrequency );
-#ifdef STACK_DEBUG
-    stack_task_ahrs = uxTaskGetStackHighWaterMark( NULL );
-#endif
-  }
-  /* USER CODE END ahrs_task */
-}
 
-/* USER CODE BEGIN Header_blackbox */
 uint32_t write_time;
 extern float roll_desired;
 extern float pitch_desired;
@@ -228,21 +161,24 @@ extern float alt_estimate,climb_rate;
 extern float velocity_abs;
 uint32_t sdcard_fsize;
 int32_t error_count;
-extern SD_HandleTypeDef hsd;
-/**
-* @brief Function implementing the task2 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_blackbox */
-void blackbox(void const * argument)
-{
-  /* USER CODE BEGIN blackbox */
+uint8_t black_box_reset;
+int32_t alt_baro;
 
-	vTaskSuspend(NULL);
-	//__disable_irq();
+extern float velocity_test;
+extern float position_test;
+//extern SD_HandleTypeDef hsd;
+/**
+  * @brief  Function implementing the task1 thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_blackbox_task */
+void blackbox_task(void const * argument)
+{
+  /* USER CODE BEGIN blackbox_task */
+  /* Infinite loop */
+	//vTaskSuspend(NULL);
 	black_box_init();
-	//__enable_irq();
 	black_box_reset = TRUE;
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 100;  // 25 ms
@@ -250,8 +186,7 @@ void blackbox(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	static uint32_t start_time_ms;
-    if(ibusChannelData[CH5] > CHANNEL_HIGH ){
+		static uint32_t start_time_ms;
 		if(black_box_reset){
 			black_box_pack_str("----------------------------new data----------------------------------------------------------------\n");
 			black_box_reset = FALSE;
@@ -296,7 +231,7 @@ void blackbox(void const * argument)
 		int16_t vx = _gps.velocity[0];  // cm/s
 		int16_t vy = _gps.velocity[1];  // cm/s
 		int16_t vz = _gps.velocity[2];  // cm/s
-		int32_t ground_speed = sqrt(sq(vx) + sq(vy)) ;
+		int32_t ground_speed = sqrt(sq(vx) + sq(vy) + sq(vz)) ;
 
 		black_box_pack_int(_gps.position[0]);
 		black_box_pack_char(' ');
@@ -306,102 +241,109 @@ void blackbox(void const * argument)
 		black_box_pack_char(' ');
 		black_box_pack_int(_gps.altitude_mgl);
 		black_box_pack_char(' ');
-		black_box_pack_int(_gps.numSat);
-		black_box_pack_char(' ');
+		//black_box_pack_int(_gps.numSat);
+		//lack_box_pack_char(' ');
 		black_box_pack_int(_gps.fix);
 		black_box_pack_char(' ');
 		black_box_pack_int(ground_speed);
+		black_box_pack_char(' ');
+		black_box_pack_int((int)(pid_velo_scale*1000));   // cm
 		black_box_pack_char(' ');
 		black_box_pack_int(vz);
 
 		/*---- estimate ---------------------------*/
 		black_box_pack_char(' ');
-		black_box_pack_int((int)(alt_estimate*100)); //cm
+		black_box_pack_int((int)(position_test*100)); //cm
 		black_box_pack_char(' ');
-		black_box_pack_int((int)(climb_rate*100));   // cm/s
+		black_box_pack_int((int)(velocity_test*100));   // cm/s
 		black_box_pack_char(' ');
 		black_box_pack_int(alt_baro);   // cm
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(velocity_abs*100));   // cm
-
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(pid_velo_scale*1000));   // cm
+		//black_box_pack_char(' ');
+		//black_box_pack_int((int)(velocity_abs*100));   // cm
 
 		/*----- end line && load data to sd card- -----*/
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 		//sdcard_fsize = black_box_get_file_size();
 		black_box_pack_char('\n');
 		black_box_load();
-    }else{
-    	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4,GPIO_PIN_RESET);
-    	black_box_reset = TRUE;
-    }
-    /* if error init again */
-	if(puts_state == -1){
-	   error_count ++;
-	   //HAL_SD_Init(&hsd);
-	   //HAL_SD_InitCard(&hsd);
-	   //black_box_init();
-	 }
 
+		if(puts_state != -1){
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+		}
 	vTaskDelayUntil( &xLastWakeTime, xFrequency);
 #ifdef STACK_DEBUG
     stack_task_blackbox = uxTaskGetStackHighWaterMark( NULL );
 #endif
   }
-  /* USER CODE END blackbox */
+  /* USER CODE END blackbox_task */
 }
 
-/* USER CODE BEGIN Header_led_indicate */
+/* USER CODE BEGIN Header_ahrs_ctrl_task */
+int16_t gyro_imu[3];
+int16_t acc_imu[3];
+int16_t mag_raw[3];
+/**
+* @brief Function implementing the task2 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_ahrs_ctrl_task */
+void ahrs_ctrl_task(void const * argument)
+{
+  /* USER CODE BEGIN ahrs_ctrl_task */
+  /* Infinite loop */
+    ibus_init(&huart2);
+	attitude_ctrl_init();
+	initPWM(&htim3);
+	compassInit();
+	baro_init();
+	TickType_t xLastWakeTime;
+	const TickType_t xFrequency = 10; // 100 hz loop
+	xLastWakeTime = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4); // for debug
+	//timer_calculate_boottime();
+	if(is_baro_calibration() == FALSE){
+		baro_zero_calibrate();
+	}
+	alt_baro = baro_get_altitude();
+	position_test += 0.02*(alt_baro - position_test);
+	float vz =_gps.velocity[2]/100.0f;
+	velocity_test += 0.02*(vz - velocity_test);
+	ibusFrameComplete();
+	gps_readout();
+	update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],0.01);
+	attitude_ctrl(0.01);
+
+	if(ibusChannelData[CH6] < CHANNEL_HIGH ){
+    	vTaskSuspend(task1Handle);
+    	black_box_reset = TRUE;
+    }
+    else{
+    	vTaskResume(task1Handle);
+    }
+
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
+	vTaskDelayUntil( &xLastWakeTime, xFrequency );
+#ifdef STACK_DEBUG
+	stack_task_ahrs = uxTaskGetStackHighWaterMark( NULL );
+#endif
+  }
+  /* USER CODE END ahrs_ctrl_task */
+}
+
+/* USER CODE BEGIN Header_imu_sensor_task */
 /**
 * @brief Function implementing the task3 thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_led_indicate */
-void led_indicate(void const * argument)
+/* USER CODE END Header_imu_sensor_task */
+void imu_sensor_task(void const * argument)
 {
-  /* USER CODE BEGIN led_indicate */
-  /* Infinite loop */
-  for(;;)
-  {
-	  /*
-	static uint32_t delay;
-	if(fdata.file.err != -1 && ibusChannelData[CH10] > 1700){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-		delay = 100;
-		vTaskResume(task2Handle);
-	}
-	else{
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-		delay = 500;
-		vTaskSuspend(task2Handle);
-	}
-	*/
-	if(_gps.fix > 1){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	}
-#ifdef STACK_DEBUG
-	stack_task_led = uxTaskGetStackHighWaterMark( NULL );
-#endif
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    osDelay(1000);
-  }
-  /* USER CODE END led_indicate */
-}
-
-/* USER CODE BEGIN Header_read_sensor */
-/**
-* @brief Function implementing the myTask04 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_read_sensor */
-void read_sensor(void const * argument)
-{
-  /* USER CODE BEGIN read_sensor */
+  /* USER CODE BEGIN imu_sensor_task */
   /* Infinite loop */
 	int16_t gyso_offset[3] = {0,0,0};
 	axis3_t raw;
@@ -410,6 +352,7 @@ void read_sensor(void const * argument)
 	uint8_t first_loop = 1;
 	compassInit();
 	mpu6050_init(&hi2c2);
+	i2cDectect(&hi2c2);
 	HAL_Delay(2000);
 	imu_calibrate(&gyso_offset[0],&gyso_offset[1],&gyso_offset[2]);
 	TickType_t xLastWakeTime;
@@ -423,6 +366,7 @@ void read_sensor(void const * argument)
 		gyro_add[1] += (raw.y - gyso_offset[1]);
 		gyro_add[2] += (raw.z - gyso_offset[2]);
 		sample_count ++;
+
 		if(sample_count >= 5){
 		   axis3_t mag;
 		   compass_get(&mag);
@@ -437,7 +381,6 @@ void read_sensor(void const * argument)
 		   gyro_add[1] = 0;
 		   gyro_add[2] = 0;
 		   sample_count = 0;
-		   //vTaskResume(task1Handle);
 		}
 
 		raw.x = 0;
@@ -455,45 +398,42 @@ void read_sensor(void const * argument)
 		acc_imu[0] += 0.1*(raw.x - acc_imu[0]);
 		acc_imu[1] += 0.1*(raw.y - acc_imu[1]);
 		acc_imu[2] += 0.1*(raw.z - acc_imu[2]);
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
 #ifdef STACK_DEBUG
-	    stack_task_sensor = uxTaskGetStackHighWaterMark( NULL );
+		stack_task_sensor = uxTaskGetStackHighWaterMark( NULL );
 #endif
 		vTaskDelayUntil( &xLastWakeTime, xFrequency );
+
 	}
-		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3); // debug
-  /* USER CODE END read_sensor */
+  /* USER CODE END imu_sensor_task */
 }
 
-/* USER CODE BEGIN Header_mavlinkOSD */
+/* USER CODE BEGIN Header_osd_task */
 /**
-* @brief Function implementing the myTask05 thread.
+* @brief Function implementing the task4 thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_mavlinkOSD */
-void mavlinkOSD(void const * argument)
+/* USER CODE END Header_osd_task */
+void osd_task(void const * argument)
 {
-  /* USER CODE BEGIN mavlinkOSD */
-	mavlinkInit(1,1,&huart1,57600);
-	TickType_t xLastWakeTime;
-	const TickType_t xFrequency = 50;  // 25 ms
-	xLastWakeTime = xTaskGetTickCount();
+  /* USER CODE BEGIN osd_task */
   /* Infinite loop */
   for(;;)
   {
-	mavlink_osd();
-	//mavlink_send_heartbeat();
-	vTaskDelayUntil( &xLastWakeTime, xFrequency);
+	if(_gps.fix > 1){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	}
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    osDelay(100);
 #ifdef STACK_DEBUG
     stack_task_mavOSD = uxTaskGetStackHighWaterMark( NULL );
 #endif
   }
-  /* USER CODE END mavlinkOSD */
+  /* USER CODE END osd_task */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-/* USER CODE BEGIN readIMU */
 
 /* USER CODE END Application */
-

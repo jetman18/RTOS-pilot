@@ -68,7 +68,7 @@ int16_t calib_axi[3];
 int16_t maxval[] = {0,0,0};
 
 const uint8_t hmc_addr = 0x1e<<1;
-I2C_HandleTypeDef *qmc_i2cport;
+static I2C_HandleTypeDef *qmc_i2cport;
 float heading;
 uint16_t timeout = 1000; // ms
 uint16_t read_timeout = 1000; //ms

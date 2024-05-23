@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 //#define SIMULATION
 // attitude controll
 
@@ -23,7 +23,7 @@ void mavlink_send_attitude(float roll,float pitch, float yaw);
 void mavlink_osd();
 
 // attitude contrller
-void attitude_ctrl(const uint32_t micros);
+void attitude_ctrl(const float dt);
 void rate_stabilize(float dt);
 void attitude_ctrl_init();
 // mainloop

@@ -1,3 +1,0 @@
-../Core/Lib/maths.h:163:12:constrain	3
-../Core/Lib/faulthandler.c:8:6:fault_pc13_blink	1
-../Core/Lib/faulthandler.c:16:6:fault_buzz	1

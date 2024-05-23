@@ -40,7 +40,7 @@ float TEMP;
 
 static uint16_t ms5611_c[PROM_NB];  // on-chip ROM
 
-static I2C_HandleTypeDef *hi2c = NULL;
+static I2C_HandleTypeDef *hi2c;
 static uint32_t baro_timer;
 int32_t altitude_offset;
 

@@ -1,4 +1,4 @@
-#include "stm32f1xx.h"
+#include "stm32f4xx.h"
 #include "i2c.h"
 #include "gpio.h"
 #include "string.h"
@@ -13,21 +13,14 @@
 #include "axis.h"
 
 #include "../epprom/AT24Cxx_stm32_hal.h"
-
 #include "blackbox.h"
 
 
 #define QMC5883
 
-// blackbox store calirbate value
-//black_box_file_t calib_file;
-
-//static uint8_t is_calibrated = FALSE;
-char file_name[] = "compassdata.txt";
 
 const int16_t max_change = 8000;
 uint16_t ignore_data;
-AT24Cxx_devices_t device_array;
 
 static void compass_calibrate();
 static void read_calibrate_file();
@@ -40,12 +33,13 @@ typedef struct{
 }cali_mag_t;
 
 cali_mag_t calibrate_value;
-int8_t file_open;
+int8_t file_open = 0;
 
-
+ AT24Cxx_devices_t device_array;
 /*  Init compass
  */
 void compassInit(){
+
   calibrate_value.scale_factor_axis[X] = 1.0f;
   calibrate_value.scale_factor_axis[Y] = 1.0f;
   calibrate_value.scale_factor_axis[Z] = 1.0f;
@@ -53,25 +47,31 @@ void compassInit(){
   calibrate_value.hard_iron_calibrate_value[X] = 0;
   calibrate_value.hard_iron_calibrate_value[Y] = 0;
   calibrate_value.hard_iron_calibrate_value[Z] = 0;
-	
-  //file_open = black_box_create_file(&calib_file,file_name);
-	 
- // epprom init
+
   AT24Cxx_init(&device_array, 0x00, &hi2c2);
   AT24Cxx_add_dev(&device_array, 0x01, &hi2c2);
 
-  // init sensor
 #ifdef QMC5883
   qmc5883_init(&hi2c1);
 #else
   hmc5883_init(&hi2c2);
 #endif
+
   if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5)){
       compass_calibrate();
   }
   else{
       read_calibrate_file();
   }
+  /*
+     calibrate_value.scale_factor_axis[X] = 1.0f;
+    calibrate_value.scale_factor_axis[Y] = 1.0f;
+    calibrate_value.scale_factor_axis[Z] = 1.0f;
+
+    calibrate_value.hard_iron_calibrate_value[X] = 500;
+    calibrate_value.hard_iron_calibrate_value[Y] = 20;
+    calibrate_value.hard_iron_calibrate_value[Z] = 20;
+*/
 }
 
 void compass_get(axis3_t *out){
@@ -123,7 +123,6 @@ void read_calibrate_file(){
     sum_all += (int)calibrate_value.hard_iron_calibrate_value[X];
     sum_all += (int)calibrate_value.hard_iron_calibrate_value[Y];
     sum_all += (int)calibrate_value.hard_iron_calibrate_value[Z];
-
     if(ABS(sum_all - (int)calibrate_value.sum_all_value) > 40){
       while(1){
 	   HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
@@ -134,7 +133,6 @@ void read_calibrate_file(){
     }
 }
 
-
 /* Calibrate function
  * write calibrate value to sd card
  */
@@ -142,7 +140,7 @@ static void compass_calibrate(){
     int16_t max_val[] = {-32767,-32767,-32767};
     int16_t min_val[] = {32767, 32767, 32767};
     uint8_t fist_data = TRUE;
-    cali_mag_t calibrate_temp;
+    static cali_mag_t calibrate_temp;
     ignore_data = 0;
     int16_t last_axis[3];
     axis3_t as;
@@ -184,23 +182,10 @@ static void compass_calibrate(){
         if(as.y < min_val[Y]) min_val[Y] = as.y;
         if(as.z < min_val[Z]) min_val[Z] = as.z;
 		
-	    // write data to sc card
-        
-        /*
-        black_box_pack_int(&calib_file,(int)as.x);
-        black_box_pack_str(&calib_file," ");
-        black_box_pack_int(&calib_file,(int)as.y);
-        black_box_pack_str(&calib_file," ");
-        black_box_pack_int(&calib_file,(int)as.z);
-        black_box_pack_str(&calib_file,"\n");
-		
-		black_box_load(&calib_file);
-        black_box_sync(&calib_file);
-        */
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-        HAL_Delay(20); // 10 Hz loop
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        HAL_Delay(50); // 10 Hz loop
 
-       if(HAL_GPIO_ReadPin (GPIOB, GPIO_PIN_5) == 0){
+       if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5) == 0){
               break;
           }
 	  }
@@ -248,33 +233,9 @@ static void compass_calibrate(){
     calibrate_temp.sum_all_value += (int)calibrate_temp.hard_iron_calibrate_value[Z];
     // write data to eprrom
     AT24Cxx_write_byte_buffer(device_array.devices[0],(uint8_t*)&calibrate_temp, 0x0010, sizeof(cali_mag_t));
-
-	/*
-	// write data to sc card
-	black_box_pack_str(&calib_file,"calibrate \n");
-    black_box_pack_int(&calib_file, calibrate_temp.hard_iron_calibrate_value[X]);
-    black_box_pack_str(&calib_file," ");
-    black_box_pack_int(&calib_file, calibrate_temp.hard_iron_calibrate_value[Y]);
-    black_box_pack_str(&calib_file," ");
-    black_box_pack_int(&calib_file, calibrate_temp.hard_iron_calibrate_value[Z]);
-    black_box_pack_str(&calib_file,"\n");
-
-    black_box_pack_float(&calib_file,calibrate_temp.scale_factor_axis[X],3);
-    black_box_pack_str(&calib_file," ");
-    black_box_pack_float(&calib_file,calibrate_temp.scale_factor_axis[Y],3);
-    black_box_pack_str(&calib_file," ");
-	black_box_pack_float(&calib_file,calibrate_temp.scale_factor_axis[Z],3);
-    black_box_pack_str(&calib_file,"\n");
-
-    black_box_pack_str(&calib_file,"\n");
-    */
-  
-   // black_box_load(&calib_file);
-   // black_box_close(&calib_file);
-	
 	while(1){
-	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-      HAL_Delay(1000); // 10 Hz loop
+	   HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+       HAL_Delay(1000); // 10 Hz loop
 	}
 }
 

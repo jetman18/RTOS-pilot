@@ -15,4 +15,4 @@
 ../Core/Lib/blackbox.c:165:13:reverse	32	static
 ../Core/Lib/blackbox.c:177:13:intToStr	24	static
 ../Core/Lib/blackbox.c:193:12:n_tu	24	static
-../Core/Lib/blackbox.c:204:12:Float_to_string	168	static
+../Core/Lib/blackbox.c:204:12:Float_to_string	160	static

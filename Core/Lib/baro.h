@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 
 void baro_init();
 void baro_zero_calibrate();

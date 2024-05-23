@@ -1,5 +1,5 @@
 #include "timer.h"
-#include "stm32f1xx_hal.h"
+#include "stm32f4xx_hal.h"
 #include "maths.h"
 
 TIM_HandleTypeDef *htimmz;

@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "stm32f1xx.h"
+#include "stm32f4xx.h"
 #include "stdio.h"
 
 typedef struct {
