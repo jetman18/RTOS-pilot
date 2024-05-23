@@ -6,7 +6,7 @@ Flight controller for fixed-wing uav
 - 1 I2C
 - 6 PWM output
 - 9 GPIO
-- MCU stm32f103vct6
+- MCU stm32f407vet6
 - mpu-6050
 - hmc-5883 magnetic sensor
 - ms-5611  baro
