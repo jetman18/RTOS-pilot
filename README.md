@@ -49,7 +49,7 @@ Flight controller for fixed-wing uav
 ### Roll axis 
 
 [//]:<p align="center">
-<img src="./images/roll_ctr.jpg" width="700" height="350" />
+<img src="./images/roll.png" width="700" height="350" />
 </p>
 
 ### Pitch axis 
