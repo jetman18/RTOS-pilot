@@ -9,6 +9,7 @@
 #include "../Lib/gps.h"
 #include "../Lib/filter.h"
 #include "../Lib/utils.h"
+#include "../Lib/baro.h"
 
 #include "../Driver/ibus.h"
 #include "string.h"
@@ -19,9 +20,13 @@
 #define MINIMUN_SPEED    12    /* m/s  */
 #define MAXIMUN_SPEED    33    /* m/s  */
 
-#define MIN_PID_SPEED_SCALE 0.3f
+#define MIN_ROLL_PID_SPEED_SCALE 0.5f
+#define MIN_PITCH_PID_SPEED_SCALE 0.3f
 #define MAX_PID_SPEED_SCALE 1.0f
 #define ERROR_RESET_I_TERM  2.5f
+
+#define SAFETY_ANGLE_ROLL  60
+#define SAFETY_ANGLE_PITCH  60
 
 
 typedef enum{
@@ -39,23 +44,24 @@ int servoL,servoR;
 
 int8_t speed_filter_reset;
 // angle stabilize
-static pid_t roll_rate_pid,pitch_rate_pid;
-static pid_t roll_angle_pid,pitch_angle_pid;
+static pid_ roll_rate_pid,pitch_rate_pid;
+static pid_ roll_angle_pid,pitch_angle_pid;
 // rate stabilize
 //static pid_t roll_rate_t,pitch_rate_t;
 
 static int16_t smooth_ch1=0, smooth_ch2=0;
 
 float roll_pid_rc_gain,pitch_pid_rc_gain;
-float roll_trim,pitch_trim;
 
 float ab_speed_filted;
-
 float pid_velo_scale;
+
+int8_t manual_trim_state = 1;
+int16_t manual_trim_roll,manual_trim_pitch;
 
 /*
  *  init pid controller
- **/
+ */
 void attitude_ctrl_init(){
    speed_filter_reset = TRUE;
    ab_speed_filted = 0.0f;
@@ -69,23 +75,59 @@ void attitude_ctrl_init(){
             pid_profile_1.roll_fcut_err,  pid_profile_1.pitch_f_cut_rate_D,pid_profile_1.pitch_max_I);
 }
 
-void attitude_ctrl(const float dt){
+
+
+int32_t baro_alt;
+int32_t baro_climb;
+float Kp_alt = 0.04f;
+/*
+ *  Altitude controller
+ *  Return pitch desired
+ */
+int32_t altitude_Pid(int32_t alt_target){
+	if(is_baro_calibration() == FALSE){
+		baro_zero_calibrate();
+	}else{
+		baro_calculate(0.01);
+		baro_alt = baro_get_altCm();    //cm
+		baro_climb = baro_get_climbCm();//cm 
+	}
+    int error_alt = alt_target - baro_alt;
+    error_alt = constrain(error_alt,-10,20);
+    return error_alt*Kp_alt;
+}
+
+
+/*
+ *   Atittude control function
+ */
+void attitude_ctrl_start(const float dt){
     static float roll_pid_smooth = 0.0f;
     static float pitch_pid_smooth = 0.0f;
 
     if(dt < 0 || dt > MAX_WAIT_TIME){
+        servoL = 1500;
+        servoR = 1500;
+        //write_pwm_ctrl(1000,servoL,servoR);
         return;
     }
 
-  roll_trim = ((int)ibusChannelData[CH8] - 1500);
-  pitch_trim = ((int)ibusChannelData[CH7] - 1500);
+   // calculate trim value
+   int16_t roll_trim  = (int)ibusChannelData[CH8] - 1500;
+   int16_t pitch_trim = (int)ibusChannelData[CH7] - 1500;
+
+   if(manual_trim_state){
+        manual_trim_roll = roll_trim;
+        manual_trim_pitch = pitch_trim;
+   }
         // stabilize mode
    if(ibusChannelData[CH5] > CHANNEL_HIGH ){
+        manual_trim_state = 0;
         /* calculate roll && pitch desired */
-        roll_desired = ((int)ibusChannelData[0] - 1500)*0.15f ;   /*  -50 <-  -> +50  */
-        pitch_desired = ((int)ibusChannelData[1] - 1500)*-0.15f;  /*  -75 <-  -> +75  */
+        roll_desired  = ((int)ibusChannelData[0] - 1500)* 0.12f  + roll_trim*0.05f;   /*  -60 <-  -> +60  */
+        pitch_desired = ((int)ibusChannelData[1] - 1500)*-0.12f  + 10;  /*    -60 <-  -> +60  */
 
-        /*---- pid scale with velocity  -----*/
+        /*---- pid scaler with velocity  -----*/
         if(_gps.fix > 1){
             float vn = (float)_gps.velocity[0]/100;  // m
             float ve = (float)_gps.velocity[1]/100;  // m
@@ -103,34 +145,21 @@ void attitude_ctrl(const float dt){
         }
         else{
             speed_filter_reset = TRUE;
-            pid_velo_scale = (MIN_PID_SPEED_SCALE + MAX_PID_SPEED_SCALE)/2.0f;
-            //pid_velo_scale = MAX_PID_SPEED_SCALE;
-            /*
-            if(ibusChannelData[CH6] > CHANNEL_HIGH){
-                pid_velo_scale = 1;
-            }else{
-                pid_velo_scale = 0.3f;
-            }
-            */
+            //pid_velo_scale = (MIN_PID_SPEED_SCALE + MAX_PID_SPEED_SCALE)/2.0f;
+            pid_velo_scale = 1;
         }
 
-        /*------ yaw axis -----------*/
-        /*
-        const float yaw_rate_measurement = AHRS.yaw_rate;
-        const float yaw_measurement = AHRS.yaw;   // 0 -> 359
-        float yaw_d;
-        // calculate yaw rate desired
-        float delta_yaw = yaw_d - yaw_measurement;
-        if(delta_yaw > 180.0f){
-             delta_yaw = delta_yaw - 360.0f;
-        }
 
-        */
-        const float pid_roll_vel_scale  = constrainf(pid_velo_scale,MIN_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
-        const float pid_pitch_vel_scale = constrainf(pid_velo_scale,MIN_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
+        float roll_measurement = AHRS.roll;
+        float pitch_measurement = AHRS.pitch;
+        //if(abs(roll_measurement) > SAFETY_ANGLE_ROLL && abs(pitch_measurement) < SAFETY_ANGLE_PITCH){
+        //    // priority to roll
+        //}
+        
+        const float pid_roll_vel_scale  = constrainf(pid_velo_scale,MIN_ROLL_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
+        const float pid_pitch_vel_scale = constrainf(pid_velo_scale,MIN_PITCH_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
 
         /*----- roll axis pid   -----*/
-        const float roll_measurement = AHRS.roll;
         const float roll_rate_measurement = AHRS.roll_rate;
         float roll_rate_desired =  pid_calculate(&roll_angle_pid,roll_measurement,roll_desired,1.0f,dt);
         // limit rate
@@ -147,9 +176,11 @@ void attitude_ctrl(const float dt){
         // filter pid  LPF
         roll_pid_smooth += pt1FilterGain(pid_profile_1.roll_pid_fcut,dt)*(r_rate_pid - roll_pid_smooth);
 
-
+        #define DEFAULT_ALT 500 // 50 mm
         /*-----  pitch axis pid  ---------*/
-        const float pitch_measurement = AHRS.pitch;
+        if(ibusChannelData[CH10] > CHANNEL_HIGH && ibusChannelData[CH5] > CHANNEL_HIGH){
+            pitch_measurement = altitude_Pid(500);
+        }
         const float pitch_rate_measurement = AHRS.pitch_rate;
         float pitch_rate_desired =  pid_calculate(&pitch_angle_pid,pitch_measurement,pitch_desired,1.0f,dt);
         // limit rate
@@ -167,38 +198,76 @@ void attitude_ctrl(const float dt){
         pitch_pid_smooth += pt1FilterGain(pid_profile_1.pitch_pid_fcut,dt)*(p_rate_pid - pitch_pid_smooth);
         
         // enable && disable I term, for test only
-		if(ibusChannelData[CH10] > CHANNEL_HIGH ){
+		if(ibusChannelData[CH9] > CHANNEL_HIGH ){
 			pitch_rate_pid.i_term = 0;
 			roll_rate_pid.i_term = 0;
 		}
 
         /*-------------- mix channel --------------------------*/
+		/*
 		if(ibusChannelData[CH9] > CHANNEL_HIGH ){
                 // roll stabilize
 				int pitch_rc = 1500 - ibusChannelData[CH2];
-				servoL = 1500 - roll_pid_smooth + pitch_rc + roll_trim  + pitch_trim;
-				servoR = 1500 + roll_pid_smooth + pitch_rc - roll_trim  + pitch_trim;
+				servoL = 1500 - roll_pid_smooth - pitch_rc + roll_trim  + pitch_trim;
+				servoR = 1500 + roll_pid_smooth - pitch_rc - roll_trim  + pitch_trim;
 		}else{
                // pitch stabilize
 				int roll_rc = 1500 - ibusChannelData[CH1];
 				servoL = 1500 +  roll_rc*0.5 - pitch_pid_smooth    + roll_trim  + pitch_trim;
 				servoR = 1500 -  roll_rc*0.5 - pitch_pid_smooth    - roll_trim  + pitch_trim;
 		}
+		*/
+        servoL = 1500 - roll_pid_smooth - pitch_pid_smooth;
+		servoR = 1500 + roll_pid_smooth - pitch_pid_smooth;
         
     }
     // manual mode
     else{
+    	pitch_rate_pid.i_term = 0;
+    	roll_rate_pid.i_term = 0;
+
         int s1 = 1500 - ibusChannelData[CH1];
         int s2 = 1500 - ibusChannelData[CH2];
 
-        smooth_ch1 += 0.5*(s1*0.5 - smooth_ch1);
-        smooth_ch2 += 0.5*(s2 - smooth_ch2);
+        smooth_ch1 += 0.7*(s1*0.5 - smooth_ch1);
+        smooth_ch2 += 0.7*(s2 - smooth_ch2);
 
-        servoL = 1500 + smooth_ch1 - smooth_ch2  + roll_trim  + pitch_trim;
-        servoR = 1500 - smooth_ch1 - smooth_ch2  - roll_trim  + pitch_trim;
+        servoL = 1500 + smooth_ch1 - smooth_ch2  + manual_trim_roll  + manual_trim_pitch;
+        servoR = 1500 - smooth_ch1 - smooth_ch2  - manual_trim_roll  + manual_trim_pitch;
     }
-   write_pwm_ctrl(1000,servoL,servoR);
+   //write_pwm_ctrl(1000,servoL,servoR);
+    mavlink_rc_raw(1000,servoL,servoR);
 }
+
+
+/*
+* this function check plane is flying
+*/
+bool isFlying(){
+    static uint32_t timer = 0;
+    static uint8_t fly_cond_cnt = 0;
+    static uint8_t fly_state = 0;
+    uint16_t throtle = ibusChannelData[CH3];
+    if(throtle > 1800 && fly_state == 0){
+        if((millis() - timer) > 1500){  // 1.5 s 
+              fly_cond_cnt ++;
+        }
+    }else{
+        timer = millis();
+        return 0;
+    }
+    int32_t vn = _gps.velocity[0]; 
+    int32_t ve = _gps.velocity[1];
+    int32_t absolute_velocity = sqrt(sq(vn) + sq(ve));
+    if(absolute_velocity > 1000 && fly_cond_cnt > 0 ){
+        if(fly_state == 0){
+            fly_state = 1;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 /*
 pid_t yaw_pid;
 

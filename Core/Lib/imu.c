@@ -15,9 +15,6 @@
 #define OFFSET_CYCLE  1000
 #define USE_MAG 1
 
-float velocity_test = 0;
-float position_test = 0;
-
 attitude_t AHRS;
 float integralFBx;
 float integralFBy;
@@ -104,7 +101,8 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
 	gz = (gz_/config.gyr_lsb) * RAD;
 
 	if(!((accx_ == 0) && (accy_ == 0) && ( accz_ == 0))) {
-		norm = invSqrt_(accx_ * accx_ + accy_ * accy_ + accz_ * accz_);
+		uint32_t acc_abs =  accx_ * accx_ + accy_ * accy_ + accz_ * accz_;
+		norm = invSqrt_((float)acc_abs);
 		acc_x = (float)accx_ * norm;
 		acc_y = (float)accy_ * norm;
 		acc_z = (float)accz_ * norm;
@@ -219,9 +217,6 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     	acc_Eframe[Y] = 0;
     	acc_Eframe[Z] = 0;
     }
-
-	position_test += velocity_test*0.01f + 0.5* acc_Eframe[Z]* 0.01f * 0.01f;
-	velocity_test += acc_Eframe[Z]*0.01f;
 
 	AHRS.pitch = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]))*DEG;// - pitch_trim_imu;
 	AHRS.roll = -atan2_approx(-dcm[1][2],dcm[2][2])*DEG;//  - roll_trim_imu;

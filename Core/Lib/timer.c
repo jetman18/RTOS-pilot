@@ -2,7 +2,7 @@
 #include "stm32f4xx_hal.h"
 #include "maths.h"
 
-TIM_HandleTypeDef *htimmz;
+//static TIM_HandleTypeDef *htimmz;
 bootTime_t boottime;
 uint32_t _micros;
 
@@ -25,9 +25,9 @@ void timer_calculate_boottime(){
   boottime.hour  = setoverFlow((sec_L/3600),23);
 }
 
-void timer_start(TIM_HandleTypeDef *htimz){
-	htimmz = htimz;
-	HAL_TIM_Base_Start_IT(htimmz);
+void timer_start(){
+	//htimmz = htimz;
+	HAL_TIM_Base_Start_IT(&htim4);
 }
 
 void delay_us(uint32_t us){
@@ -43,7 +43,7 @@ TIM_HandleTypeDef *timer_name(){
 }
 
 void resetCounter(){
-   __HAL_TIM_SET_COUNTER(htimmz,0);
+   __HAL_TIM_SET_COUNTER(&htim4,0);
 }
 void timer_callback(){
     _micros += 65536;

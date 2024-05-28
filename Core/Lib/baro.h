@@ -9,8 +9,9 @@ extern "C" {
 void baro_init();
 void baro_zero_calibrate();
 int8_t is_baro_calibration();
-int32_t baro_get_altitude();
-
+void baro_calculate(float dt);
+int32_t baro_get_climbCm();
+int32_t baro_get_altCm();
 #ifdef __cplusplus
 }
 #endif

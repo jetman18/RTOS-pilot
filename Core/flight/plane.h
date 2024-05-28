@@ -19,11 +19,11 @@ void mavlinkInit(uint8_t syss_id, uint8_t comm_id,UART_HandleTypeDef *uartt,uint
 void mavlinkCallback();
 void mavlink_tx_cpl_callback();
 void mavlink_send_heartbeat();
-void mavlink_send_attitude(float roll,float pitch, float yaw);
+void mavlink_rc_raw(uint16_t thortle,uint16_t servo_L, uint16_t servo_R);
 void mavlink_osd();
 
 // attitude contrller
-void attitude_ctrl(const float dt);
+void attitude_ctrl_start(const float dt);
 void rate_stabilize(float dt);
 void attitude_ctrl_init();
 // mainloop

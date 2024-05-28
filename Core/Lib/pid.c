@@ -4,8 +4,8 @@
 #include "timer.h"
 #include "string.h"
 
-void pid_init(pid_t  *pid_in,float kp, float ki, float kd,float f_cut_err, float f_cut_D, float maxI){
-  memset(pid_in,0,sizeof(pid_t));
+void pid_init(pid_  *pid_in,float kp, float ki, float kd,float f_cut_err, float f_cut_D, float maxI){
+  memset(pid_in,0,sizeof(pid_));
   pid_in->err = 0.0f;
   pid_in->err_fcut = f_cut_err;
   pid_in->kp = kp;
@@ -18,7 +18,7 @@ void pid_init(pid_t  *pid_in,float kp, float ki, float kd,float f_cut_err, float
   pid_in->init = 1;
 }
 
-float pid_calculate(pid_t *pid_in,float measurement, float setpoint,float scaler,float dt){
+float pid_calculate(pid_ *pid_in,float measurement, float setpoint,float scaler,float dt){
    if(pid_in->init){
        pid_in->last_input = measurement;
        pid_in->init = 0;
@@ -46,7 +46,7 @@ float pid_calculate(pid_t *pid_in,float measurement, float setpoint,float scaler
    return output;
 }
 
-void pid_reset(pid_t *pid_in)
+void pid_reset(pid_ *pid_in)
 {
 	pid_in->i_term = 0.0f;
 	pid_in->last_input = 0.0f;
@@ -57,7 +57,7 @@ void pid_reset(pid_t *pid_in)
 
 /*
 
-float pid_calculate(pid_t *pid_in,float measurement, float setpoint,float dt){
+float pid_calculate(pid_ *pid_in,float measurement, float setpoint,float dt){
    if(pid_in->init){
        pid_in->last_input = measurement;
        pid_in->init = 0;

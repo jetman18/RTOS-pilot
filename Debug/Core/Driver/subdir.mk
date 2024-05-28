@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (12.3.rel1)
+# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
@@ -30,13 +30,13 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Core/Driver/%.o Core/Driver/%.su Core/Driver/%.cyclo: ../Core/Driver/%.c Core/Driver/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F407xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../FATFS/Target -I../FATFS/App -I../Middlewares/Third_Party/FatFs/src -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I"C:/Users/tuan/Documents/Stmproject/RTOS-pilot/Core/Driver" -I"C:/Users/tuan/Documents/Stmproject/RTOS-pilot/Core/epprom" -I"C:/Users/tuan/Documents/Stmproject/RTOS-pilot/Core/flight" -I"C:/Users/tuan/Documents/Stmproject/RTOS-pilot/Core/Lib" -I"C:/Users/tuan/Documents/Stmproject/RTOS-pilot/Core/mavlink" -I"C:/Users/tuan/Documents/Stmproject/RTOS-pilot/Core/simulation" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+Core/Driver/%.o: ../Core/Driver/%.c Core/Driver/subdir.mk
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F407xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../FATFS/Target -I../FATFS/App -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../Middlewares/Third_Party/FatFs/src -I"C:/Users/tuan/Documents/stm/RTOSpilot/Core/mavlink" -I"C:/Users/tuan/Documents/stm/RTOSpilot/Core/Driver" -I"C:/Users/tuan/Documents/stm/RTOSpilot/Core/epprom" -I"C:/Users/tuan/Documents/stm/RTOSpilot/Core/flight" -I"C:/Users/tuan/Documents/stm/RTOSpilot/Core/Lib" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 
 clean: clean-Core-2f-Driver
 
 clean-Core-2f-Driver:
-	-$(RM) ./Core/Driver/bmp280.cyclo ./Core/Driver/bmp280.d ./Core/Driver/bmp280.o ./Core/Driver/bmp280.su ./Core/Driver/hmc5883.cyclo ./Core/Driver/hmc5883.d ./Core/Driver/hmc5883.o ./Core/Driver/hmc5883.su ./Core/Driver/ibus.cyclo ./Core/Driver/ibus.d ./Core/Driver/ibus.o ./Core/Driver/ibus.su ./Core/Driver/mpu6050.cyclo ./Core/Driver/mpu6050.d ./Core/Driver/mpu6050.o ./Core/Driver/mpu6050.su ./Core/Driver/ms5611.cyclo ./Core/Driver/ms5611.d ./Core/Driver/ms5611.o ./Core/Driver/ms5611.su ./Core/Driver/qmc5883.cyclo ./Core/Driver/qmc5883.d ./Core/Driver/qmc5883.o ./Core/Driver/qmc5883.su
+	-$(RM) ./Core/Driver/bmp280.d ./Core/Driver/bmp280.o ./Core/Driver/hmc5883.d ./Core/Driver/hmc5883.o ./Core/Driver/ibus.d ./Core/Driver/ibus.o ./Core/Driver/mpu6050.d ./Core/Driver/mpu6050.o ./Core/Driver/ms5611.d ./Core/Driver/ms5611.o ./Core/Driver/qmc5883.d ./Core/Driver/qmc5883.o
 
 .PHONY: clean-Core-2f-Driver
 

@@ -7,6 +7,7 @@ extern "C" {
 
 #include "stm32f4xx_hal.h"
 #include "stdio.h"
+#include "tim.h"
 typedef struct{
     uint8_t hour;
     uint8_t min;
@@ -19,10 +20,10 @@ extern bootTime_t boottime;
 
 void timer_callback();
 void timer_calculate_boottime();
-void timer_start(TIM_HandleTypeDef *htimz);
+void timer_start();
 TIM_HandleTypeDef *timer_name();
 void delay_us(uint32_t us);
-#define micros() (_micros + (__HAL_TIM_GET_COUNTER(htimmz)))
+#define micros() (_micros + (__HAL_TIM_GET_COUNTER(&htim4)))
 #define millis() (micros() / 1000)
 #define seconds() (micros()/1000000)
 #define TIMER_CALLBACK()  (_micros += 65535)

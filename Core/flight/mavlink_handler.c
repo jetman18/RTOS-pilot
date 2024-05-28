@@ -62,26 +62,15 @@ void mavlinkCallback(){
 }
 */
 
-void mavlink_send_attitude(float roll,float pitch, float yaw){
-	static uint8_t count = 0;
-	uint16_t len = 0;
+void mavlink_rc_raw(uint16_t thortle,uint16_t servo_L, uint16_t servo_R){
+	static uint32_t count = 0;
 	if(isTxcpl)
 	{
-		if(count < 10){
-			mavlink_msg_attitude_pack(sys_id,com_id,&msg,0,roll,pitch,yaw,0,0,0);
-		}
-		else{ // send heartbeat
-			uint8_t type = MAV_TYPE_FIXED_WING;
-			uint8_t autopilot = MAV_AUTOPILOT_GENERIC;
-			uint8_t base_mode = MAV_MODE_FLAG_TEST_ENABLED;
-			mavlink_msg_heartbeat_pack(sys_id,com_id,&msg,type,autopilot,base_mode,base_mode, MAV_STATE_UNINIT);
-		}
-		len = mavlink_msg_to_send_buffer(buffer__,&msg);
+        count++;
+		mavlink_msg_rc_channels_raw_pack(sys_id,com_id,&msg,
+					count,1,servo_L, servo_R, thortle,0,0,0,0,0,0);
+		uint16_t len = mavlink_msg_to_send_buffer(buffer__,&msg);
 		HAL_UART_Transmit_DMA(uart,buffer__,len);
-		count ++;
-		if(count > 10){
-			count = 0;
-		}
 		isTxcpl = 0;
 	}
 }
@@ -92,6 +81,7 @@ void mavlink_send_attitude(float roll,float pitch, float yaw){
 *   RC signal
 *   heartbeat
 */
+/*
 void mavlink_osd(){
 	static uint8_t count_ = 0;
 	static uint8_t count2_ = 0;
@@ -105,13 +95,13 @@ void mavlink_osd(){
 			count_ ++;
 			break;
 		case 1:  
-			float airspeed = 314;    // osd in km/h
-			float groundspeed = 57;  // osd in km/h
+			//float airspeed = 314;    // osd in km/h
+			//float groundspeed = 57;  // osd in km/h
 			uint16_t throttle = (ibusChannelData[CH3] - 1000)*0.1f;
 			float alt = 333;
 			float climb = 5;
 			mavlink_msg_vfr_hud_pack(sys_id,com_id,&msg,
-						airspeed, groundspeed,AHRS.yaw, throttle,alt, climb);
+						100,1000,AHRS.yaw, throttle,alt, climb);
 			count_ ++;
 			break;
 		case 2:
@@ -140,7 +130,7 @@ void mavlink_osd(){
 				count2_ = 0;
 				break;
 
-            /*
+
 			case 3:
 			    float wind_direction = 0;
 				float wind_speed = 15;  // osd in km/h
@@ -156,7 +146,7 @@ void mavlink_osd(){
 				                                     0,q,0,0,0,thrust);
 		        count2_ = 0;
 				break;
-			*/
+
 			}
 			count_ = 0;
 		}
@@ -165,10 +155,9 @@ void mavlink_osd(){
 	    isTxcpl = 0;
 	}
 }
-
-
-
-void mavlink_send_heartbeat(){
+*/
+void mavlink_send_heartbeat()
+{
   if(isTxcpl){
 	uint8_t type = MAV_TYPE_FIXED_WING;
 	uint8_t autopilot = MAV_AUTOPILOT_GENERIC;
@@ -180,14 +169,8 @@ void mavlink_send_heartbeat(){
  }
 }
 
-/*
- * 
- */
-uint32_t temp;
 void mavlink_tx_cpl_callback()
 {   
-	//send_time_us = millis() - temp;
-	//temp = millis();
 	isTxcpl = 1;
 }
 

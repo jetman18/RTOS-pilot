@@ -1,5 +1,0 @@
-../Core/Lib/maths.h:163:12:constrain	3
-../Core/Lib/pwm.c:18:6:initPWM	1
-../Core/Lib/pwm.c:34:6:writePwm	5
-../Core/Lib/pwm.c:43:6:write_pwm_ctrl	3
-../Core/Lib/pwm.c:56:6:pwm_systick_callback	3

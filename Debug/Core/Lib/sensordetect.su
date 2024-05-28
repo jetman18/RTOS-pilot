@@ -1,2 +1,2 @@
-../Core/Lib/sensordetect.c:25:6:i2cDectect	32	static
-../Core/Lib/sensordetect.c:50:8:get_sensor_status	24	static
+sensordetect.c:25:6:i2cDectect	32	static
+sensordetect.c:50:8:get_sensor_status	24	static

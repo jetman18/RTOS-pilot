@@ -1,6 +1,0 @@
-../Core/flight/../Lib/maths.h:163:12:constrain	3
-../Core/flight/../Lib/utils.h:8:14:range360	3
-../Core/flight/../Lib/utils.h:15:14:range180	3
-../Core/flight/../Lib/utils.h:26:16:mapI	1
-../Core/flight/../Lib/utils.h:30:14:mapf	1
-../Core/flight/navigation.c:105:6:autoPilot	3

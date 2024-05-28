@@ -5,6 +5,8 @@
 #define MSTOSEC(x) (x*0.001f)
 #define sign(X) (X > 0 ? 1 : -1)
 
+typedef uint8_t bool;
+
 static float range360(float deg){
     if(deg < 0)
         deg = 360 + deg;

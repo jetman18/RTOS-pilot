@@ -52,9 +52,9 @@ static pid_profile_t pid_profile_1={
     .roll_FF_gain = 1.2f,
     .roll_fcut_err = 10,
 
-    .roll_angle_Kp = 2,
+    .roll_angle_Kp = 2.1,
     .roll_rate_Kp  = 1.1,
-    .roll_rate_Ki  = 0.5,
+    .roll_rate_Ki  = 0.8,
     .roll_rate_Kd  = 0,
 
     .roll_f_cut_rate_D = 0,
@@ -68,8 +68,8 @@ static pid_profile_t pid_profile_1={
     .pitch_fcut_err = 10,
 
     .pitch_angle_Kp = 2.1,
-    .pitch_rate_Kp  = 1.6,
-    .pitch_rate_Ki  = 0.5,
+    .pitch_rate_Kp  = 1.5,
+    .pitch_rate_Ki  = 1.5,
     .pitch_rate_Kd  = 0,
 
     .pitch_f_cut_rate_D = 0,

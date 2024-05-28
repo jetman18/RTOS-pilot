@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "ibus.h": "c",
-        "imu.h": "c"
-    }
-}

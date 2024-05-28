@@ -81,8 +81,8 @@ osThreadId task4Handle;
 /* USER CODE END FunctionPrototypes */
 
 void blackbox_task(void const * argument);
-void ahrs_ctrl_task(void const * argument);
-void imu_sensor_task(void const * argument);
+void ahrs_task(void const * argument);
+void sensor_task(void const * argument);
 void osd_task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -94,8 +94,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-  timer_start(&htim4);
-  gps_init(&huart3,115200);
+	timer_start(&htim4);
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -116,19 +115,19 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of task1 */
-  osThreadDef(task1, blackbox_task, osPriorityLow, 0, 512);
+  osThreadDef(task1, blackbox_task, osPriorityLow, 0, 1024);
   task1Handle = osThreadCreate(osThread(task1), NULL);
 
   /* definition and creation of task2 */
-  osThreadDef(task2, ahrs_ctrl_task, osPriorityHigh, 0, 256);
+  osThreadDef(task2, ahrs_task, osPriorityHigh, 0, 1024);
   task2Handle = osThreadCreate(osThread(task2), NULL);
 
   /* definition and creation of task3 */
-  osThreadDef(task3, imu_sensor_task, osPriorityRealtime, 0, 128);
+  osThreadDef(task3, sensor_task, osPriorityRealtime, 0, 512);
   task3Handle = osThreadCreate(osThread(task3), NULL);
 
   /* definition and creation of task4 */
-  osThreadDef(task4, osd_task, osPriorityLow, 0, 128);
+  osThreadDef(task4, osd_task, osPriorityLow, 0, 512);
   task4Handle = osThreadCreate(osThread(task4), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -138,7 +137,6 @@ void MX_FREERTOS_Init(void) {
 }
 
 /* USER CODE BEGIN Header_blackbox_task */
-
 #define STACK_DEBUG
 #ifdef STACK_DEBUG
 uint16_t stack_task_ahrs;
@@ -148,25 +146,19 @@ uint16_t stack_task_blackbox;
 #endif
 /***************************/
 
-
-uint32_t write_time;
 extern float roll_desired;
 extern float pitch_desired;
 extern float ab_speed_filted;
 extern float pid_velo_scale;;
-extern int32_t climb_rate_baro;
 extern int32_t puts_state;
 extern uint16_t servoL,servoR;
-extern float alt_estimate,climb_rate;
-extern float velocity_abs;
 uint32_t sdcard_fsize;
-int32_t error_count;
 uint8_t black_box_reset;
-int32_t alt_baro;
+extern int32_t baro_alt;
+extern int32_t baro_climb;
 
 extern float velocity_test;
 extern float position_test;
-//extern SD_HandleTypeDef hsd;
 /**
   * @brief  Function implementing the task1 thread.
   * @param  argument: Not used
@@ -178,107 +170,100 @@ void blackbox_task(void const * argument)
   /* USER CODE BEGIN blackbox_task */
   /* Infinite loop */
 	//vTaskSuspend(NULL);
-	black_box_init();
-	black_box_reset = TRUE;
-	TickType_t xLastWakeTime;
-	const TickType_t xFrequency = 100;  // 25 ms
-	xLastWakeTime = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-		static uint32_t start_time_ms;
-		if(black_box_reset){
-			black_box_pack_str("----------------------------new data----------------------------------------------------------------\n");
-			black_box_reset = FALSE;
-			start_time_ms = millis();
-		}
-		uint32_t time_ms =  millis() - start_time_ms;
-		// control thortle 0 -> 100%
-		int throtle = ((int)ibusChannelData[CH3] - 1000)*0.1;
+		black_box_init();
+		black_box_reset = TRUE;
+		TickType_t xLastWakeTime;
+		const TickType_t xFrequency = 100;  // 
+		xLastWakeTime = xTaskGetTickCount();
+	  /* Infinite loop */
+	  for(;;)
+	  {
+			static uint32_t start_time_ms;
+			if(black_box_reset){
+				black_box_pack_str("----------------------------new data----------------------------------------------------------------\n");
+				black_box_reset = FALSE;
+				start_time_ms = millis();
+			}
+			uint32_t time_ms =  millis() - start_time_ms;
+			// control thortle 0 -> 100%
+			int throtle = ((int)ibusChannelData[CH3] - 1000)*0.1;
 
-		// tx signal 0 -> 100 %
-		int srri = ((int)ibusChannelData[CH11] - 1000)*0.1;
+			// tx signal 0 -> 100 %
+			int srri = ((int)ibusChannelData[CH11] - 1000)*0.1;
 
-		/*** write time  ***/
-		black_box_pack_int(time_ms);
-		black_box_pack_char(' ');
+			/*** write time  ***/
+			black_box_pack_int(time_ms);
+			black_box_pack_char(' ');
 
-		/*---- control parameters ---*/
-		black_box_pack_int((int)servoL);
-		black_box_pack_char(' ');
-		black_box_pack_int((int)servoR);
-		black_box_pack_char(' ');
-		black_box_pack_int(throtle);
-		black_box_pack_char(' ');
-		black_box_pack_int(srri);
-		black_box_pack_char(' ');
+			/*---- control parameters ---*/
+			black_box_pack_int((int)servoL);
+			black_box_pack_char(' ');
+			black_box_pack_int((int)servoR);
+			black_box_pack_char(' ');
+			black_box_pack_int(throtle);
+			black_box_pack_char(' ');
+			black_box_pack_int(srri);
+			black_box_pack_char(' ');
 
-		/*----- atitude ---------------------*/
-		black_box_pack_int((int)(AHRS.roll*100));
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(roll_desired*100));
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(AHRS.pitch*100));// cm
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(pitch_desired*100));
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(AHRS.yaw*100));
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(AHRS.yaw_rate*100));
-		black_box_pack_char(' ');
+			/*----- atitude ---------------------*/
+			black_box_pack_int((int)(AHRS.roll*100));
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(roll_desired*100));
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.pitch*100));// cm
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(pitch_desired*100));
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.yaw*100));
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.yaw_rate*100));
+			black_box_pack_char(' ');
 
-		/*------- GPS ----------------------*/
-		int16_t vx = _gps.velocity[0];  // cm/s
-		int16_t vy = _gps.velocity[1];  // cm/s
-		int16_t vz = _gps.velocity[2];  // cm/s
-		int32_t ground_speed = sqrt(sq(vx) + sq(vy) + sq(vz)) ;
+			/*------- GPS ----------------------*/
+			int16_t vx = _gps.velocity[0];  // cm/s
+			int16_t vy = _gps.velocity[1];  // cm/s
+			int16_t vz = _gps.velocity[2];  // cm/s
+			int32_t ground_speed = sqrt(sq(vx) + sq(vy)) ;
 
-		black_box_pack_int(_gps.position[0]);
-		black_box_pack_char(' ');
-		black_box_pack_int(_gps.position[1]);
-		black_box_pack_char(' ');
-		black_box_pack_int(_gps.altitude_msl);
-		black_box_pack_char(' ');
-		black_box_pack_int(_gps.altitude_mgl);
-		black_box_pack_char(' ');
-		//black_box_pack_int(_gps.numSat);
-		//lack_box_pack_char(' ');
-		black_box_pack_int(_gps.fix);
-		black_box_pack_char(' ');
-		black_box_pack_int(ground_speed);
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(pid_velo_scale*1000));   // cm
-		black_box_pack_char(' ');
-		black_box_pack_int(vz);
+			black_box_pack_int(_gps.position[0]);
+			black_box_pack_char(' ');
+			black_box_pack_int(_gps.position[1]);
+			black_box_pack_char(' ');
+			black_box_pack_int(_gps.altitude_msl);
+			black_box_pack_char(' ');
+			black_box_pack_int(_gps.altitude_mgl);
+			black_box_pack_char(' ');
+			//black_box_pack_int(_gps.numSat);
+			//lack_box_pack_char(' ');
+			black_box_pack_int(_gps.fix);
+			black_box_pack_char(' ');
+			black_box_pack_int(ground_speed);
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(pid_velo_scale*1000));   // cm
+			black_box_pack_char(' ');
+			black_box_pack_int(vz);
+			black_box_pack_char(' ');
+			black_box_pack_int(baro_climb);   // cm
+			black_box_pack_char(' ');
+			black_box_pack_int(baro_alt);   // cm
 
-		/*---- estimate ---------------------------*/
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(position_test*100)); //cm
-		black_box_pack_char(' ');
-		black_box_pack_int((int)(velocity_test*100));   // cm/s
-		black_box_pack_char(' ');
-		black_box_pack_int(alt_baro);   // cm
-		//black_box_pack_char(' ');
-		//black_box_pack_int((int)(velocity_abs*100));   // cm
+			/*----- end line && load data to sd card- -----*/
+			//sdcard_fsize = black_box_get_file_size();
+			black_box_pack_char('\n');
+			black_box_load();
 
-		/*----- end line && load data to sd card- -----*/
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-		//sdcard_fsize = black_box_get_file_size();
-		black_box_pack_char('\n');
-		black_box_load();
-
-		if(puts_state != -1){
-			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-		}
-	vTaskDelayUntil( &xLastWakeTime, xFrequency);
-#ifdef STACK_DEBUG
-    stack_task_blackbox = uxTaskGetStackHighWaterMark( NULL );
-#endif
-  }
+			if(puts_state != -1){
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+			}
+		vTaskDelayUntil( &xLastWakeTime, xFrequency);
+	#ifdef STACK_DEBUG
+	    stack_task_blackbox = uxTaskGetStackHighWaterMark( NULL );
+	#endif
+	  }
   /* USER CODE END blackbox_task */
 }
 
-/* USER CODE BEGIN Header_ahrs_ctrl_task */
+/* USER CODE BEGIN Header_ahrs_task */
 int16_t gyro_imu[3];
 int16_t acc_imu[3];
 int16_t mag_raw[3];
@@ -287,16 +272,19 @@ int16_t mag_raw[3];
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_ahrs_ctrl_task */
-void ahrs_ctrl_task(void const * argument)
+/* USER CODE END Header_ahrs_task */
+void ahrs_task(void const * argument)
 {
-  /* USER CODE BEGIN ahrs_ctrl_task */
+  /* USER CODE BEGIN ahrs_task */
   /* Infinite loop */
-    ibus_init(&huart2);
+	//vTaskSuspend(NULL);
 	attitude_ctrl_init();
 	initPWM(&htim3);
 	compassInit();
+	gps_init(&huart3,38400);
 	baro_init();
+	mavlinkInit(1,1,&huart1,115200);
+	ibus_init(&huart2);
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 10; // 100 hz loop
 	xLastWakeTime = xTaskGetTickCount();
@@ -308,43 +296,63 @@ void ahrs_ctrl_task(void const * argument)
 	if(is_baro_calibration() == FALSE){
 		baro_zero_calibrate();
 	}
-	alt_baro = baro_get_altitude();
-	position_test += 0.02*(alt_baro - position_test);
-	float vz =_gps.velocity[2]/100.0f;
-	velocity_test += 0.02*(vz - velocity_test);
+	// get rc channel 
 	ibusFrameComplete();
+	// gps
 	gps_readout();
 	update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],0.01);
-	attitude_ctrl(0.01);
+	attitude_ctrl_start(0.01);
+
+	if(ibusChannelData[CH10] > CHANNEL_HIGH && ibusChannelData[CH5] < CHANNEL_HIGH){
+		static uint32_t tim_;
+		if(millis() - tim_ > 200){
+            //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_1);
+
+			tim_ = millis();
+		}
+	}else{
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1,0);
+	}
+
+
+	static uint32_t gps_tim_ms;
+	if(millis() - gps_tim_ms > 200){
+	   if(_gps.fix > 1){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	   }
+	   gps_tim_ms = millis();
+	}
 
 	if(ibusChannelData[CH6] < CHANNEL_HIGH ){
-    	vTaskSuspend(task1Handle);
-    	black_box_reset = TRUE;
-    }
-    else{
-    	vTaskResume(task1Handle);
-    }
+		vTaskSuspend(task1Handle);
+		black_box_reset = TRUE;
+	}
+	else{
+		vTaskResume(task1Handle);
+	}
 
-	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
+	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
 	vTaskDelayUntil( &xLastWakeTime, xFrequency );
 #ifdef STACK_DEBUG
 	stack_task_ahrs = uxTaskGetStackHighWaterMark( NULL );
 #endif
-  }
-  /* USER CODE END ahrs_ctrl_task */
+    }
+  /* USER CODE END ahrs_task */
 }
 
-/* USER CODE BEGIN Header_imu_sensor_task */
+/* USER CODE BEGIN Header_sensor_task */
 /**
 * @brief Function implementing the task3 thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_imu_sensor_task */
-void imu_sensor_task(void const * argument)
+/* USER CODE END Header_sensor_task */
+void sensor_task(void const * argument)
 {
-  /* USER CODE BEGIN imu_sensor_task */
+  /* USER CODE BEGIN sensor_task */
   /* Infinite loop */
+	//vTaskSuspend(NULL);
 	int16_t gyso_offset[3] = {0,0,0};
 	axis3_t raw;
 	uint8_t sample_count = 0;
@@ -352,7 +360,7 @@ void imu_sensor_task(void const * argument)
 	uint8_t first_loop = 1;
 	compassInit();
 	mpu6050_init(&hi2c2);
-	i2cDectect(&hi2c2);
+	//i2cDectect(&hi2c2);
 	HAL_Delay(2000);
 	imu_calibrate(&gyso_offset[0],&gyso_offset[1],&gyso_offset[2]);
 	TickType_t xLastWakeTime;
@@ -405,7 +413,7 @@ void imu_sensor_task(void const * argument)
 		vTaskDelayUntil( &xLastWakeTime, xFrequency );
 
 	}
-  /* USER CODE END imu_sensor_task */
+  /* USER CODE END sensor_task */
 }
 
 /* USER CODE BEGIN Header_osd_task */
@@ -421,15 +429,13 @@ void osd_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	if(_gps.fix > 1){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	}
+	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4); // for debug
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    osDelay(100);
+	osDelay(1000);
 #ifdef STACK_DEBUG
-    stack_task_mavOSD = uxTaskGetStackHighWaterMark( NULL );
+	stack_task_mavOSD = uxTaskGetStackHighWaterMark( NULL );
 #endif
-  }
+    }
   /* USER CODE END osd_task */
 }
 

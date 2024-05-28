@@ -1,7 +1,7 @@
-../Core/Lib/maths.h:163:12:constrain	24	static
-../Core/Lib/gps.c:178:6:gps_init	32	static
-../Core/Lib/gps.c:215:21:gps_uart_port	4	static
-../Core/Lib/gps.c:225:6:gps_readout	16	static
-../Core/Lib/gps.c:241:6:gps_DMA_callback	4	static
-../Core/Lib/gps.c:274:16:parse_msg	4	static
-../Core/Lib/gps.c:368:16:newdata	24	static
+maths.h:163:12:constrain	24	static
+gps.c:178:6:gps_init	16	static
+gps.c:209:21:gps_uart_port	4	static
+gps.c:214:6:gps_readout	16	static
+gps.c:232:6:gps_DMA_callback	4	static
+gps.c:261:16:parse_msg	4	static
+gps.c:353:16:newdata	24	static

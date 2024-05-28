@@ -15,14 +15,14 @@ extern "C" {
 //----------------------------------IQR--Handler-----------------------------
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if(huart == ibus_uart_port())
+    if(huart == &huart2)
 	{
 		ibus_calback();
     }
-    else if(huart == gps_uart_port()){
-        gps_DMA_callback();
-    	//gps_callback();
-    }
+   else if(huart == &huart3){
+      gps_DMA_callback();
+   // 	gps_callback();
+   }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)

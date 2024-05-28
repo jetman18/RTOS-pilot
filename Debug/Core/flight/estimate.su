@@ -1,7 +1,7 @@
-../Core/flight/../Lib/maths.h:163:12:constrain	24	static
-../Core/flight/../Lib/utils.h:8:14:range360	16	static
-../Core/flight/../Lib/utils.h:15:14:range180	16	static
-../Core/flight/../Lib/utils.h:26:16:mapI	32	static
-../Core/flight/../Lib/utils.h:30:14:mapf	40	static
-../Core/flight/estimate.c:14:6:altitude_estimate	56	static
-../Core/flight/estimate.c:53:7:dynamic_speed_esitmate	32	static
+maths.h:163:12:constrain	24	static
+utils.h:10:14:range360	16	static
+utils.h:17:14:range180	16	static
+utils.h:28:16:mapI	32	static
+utils.h:32:14:mapf	40	static
+estimate.c:14:6:altitude_estimate	56	static
+estimate.c:53:7:dynamic_speed_esitmate	32	static
