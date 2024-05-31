@@ -3,6 +3,7 @@ utils.h:10:14:range360	16	static
 utils.h:17:14:range180	16	static
 utils.h:28:16:mapI	32	static
 utils.h:32:14:mapf	40	static
-imu.c:48:6:imu_calibrate	40	static
-imu.c:68:6:get_Acc_Angle	56	static
-imu.c:89:6:update_ahrs	192	static
+plane.h:18:13:f_f	4	static
+imu.c:50:6:imu_calibrate	40	static
+imu.c:70:6:get_Acc_Angle	56	static
+imu.c:91:6:update_ahrs	232	static

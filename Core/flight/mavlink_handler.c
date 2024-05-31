@@ -24,17 +24,15 @@ uint8_t buffer__[MAX_LENGHT];
 static int isTxcpl;
 uint32_t send_time_us;
 
-extern float v_estimate;
-
 void mavlinkInit(uint8_t syss_id, uint8_t comm_id,UART_HandleTypeDef *uartt,uint32_t baudrate){
     isTxcpl = 1;
     index_ =0;
 	sys_id  = syss_id;
     com_id  = comm_id;
 	uart = uartt;
-    uartt->Init.BaudRate = baudrate;
-	HAL_UART_Init(uartt);
-	HAL_UART_Receive_IT(uart, &data,1);
+    //uartt->Init.BaudRate = baudrate;
+	//HAL_UART_Init(uartt);
+	HAL_UART_Receive_IT(&huart1, &data,1);
 }
 
 UART_HandleTypeDef *mavlink_uart_port(){
@@ -70,7 +68,7 @@ void mavlink_rc_raw(uint16_t thortle,uint16_t servo_L, uint16_t servo_R){
 		mavlink_msg_rc_channels_raw_pack(sys_id,com_id,&msg,
 					count,1,servo_L, servo_R, thortle,0,0,0,0,0,0);
 		uint16_t len = mavlink_msg_to_send_buffer(buffer__,&msg);
-		HAL_UART_Transmit_DMA(uart,buffer__,len);
+		HAL_UART_Transmit_DMA(&huart1,buffer__,len);
 		isTxcpl = 0;
 	}
 }
@@ -164,7 +162,7 @@ void mavlink_send_heartbeat()
 	uint8_t base_mode = MAV_MODE_FLAG_TEST_ENABLED;
 	mavlink_msg_heartbeat_pack(sys_id,com_id,&msg,type,autopilot,base_mode,base_mode, MAV_STATE_UNINIT);
 	uint16_t len = mavlink_msg_to_send_buffer(buffer__,&msg);
-	HAL_UART_Transmit_DMA(uart,buffer__,len);
+	HAL_UART_Transmit_DMA(&huart1,buffer__,len);
   isTxcpl = 0;
  }
 }

@@ -19,6 +19,10 @@ typedef struct{
 	float pitch;
     float yaw;
 
+    float p;
+    float q;
+    float r;
+
     float roll_rate;
     float pitch_rate;
     float yaw_rate;

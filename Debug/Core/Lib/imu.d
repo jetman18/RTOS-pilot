@@ -36,7 +36,7 @@ Core/Lib/imu.o: ../Core/Lib/imu.c ../Core/Lib/imu.h \
  ../Core/Lib/compass.h ../Core/Inc/i2c.h ../Core/Lib/utils.h \
  ../Core/Lib/../Driver/ibus.h ../Core/Lib/../Driver/mpu6050.h \
  ../Core/Lib/../Driver/../Lib/axis.h ../Core/Lib/../Driver/hmc5883.h \
- ../Core/Lib/../Driver/../lib/axis.h
+ ../Core/Lib/../Driver/../lib/axis.h ../Core/Lib/../flight/plane.h
 
 ../Core/Lib/imu.h:
 
@@ -131,3 +131,5 @@ Core/Lib/imu.o: ../Core/Lib/imu.c ../Core/Lib/imu.h \
 ../Core/Lib/../Driver/hmc5883.h:
 
 ../Core/Lib/../Driver/../lib/axis.h:
+
+../Core/Lib/../flight/plane.h:

@@ -49,32 +49,32 @@ static pid_profile_t pid_profile_1={
     
 /*-----------  roll -------------*/
     .roll_rate_limit = 180,
-    .roll_FF_gain = 1.2f,
+    .roll_FF_gain = 1.7f,
     .roll_fcut_err = 10,
 
-    .roll_angle_Kp = 2.1,
+    .roll_angle_Kp = 1.9,
     .roll_rate_Kp  = 1.1,
-    .roll_rate_Ki  = 0.8,
+    .roll_rate_Ki  = 0.5,
     .roll_rate_Kd  = 0,
 
     .roll_f_cut_rate_D = 0,
     .roll_max_I = 100,
-    .roll_pid_fcut = 40,
+    .roll_pid_fcut = 20,
     .roll_max_pid  = 400,
 
 /*-----------  pitch -------------*/
-    .pitch_rate_limit = 180,
-    .pitch_FF_gain = 1.0f,
+    .pitch_rate_limit = 280,
+    .pitch_FF_gain = 2.0f,
     .pitch_fcut_err = 10,
 
-    .pitch_angle_Kp = 2.1,
-    .pitch_rate_Kp  = 1.5,
-    .pitch_rate_Ki  = 1.5,
+    .pitch_angle_Kp = 1.5,// 2.1
+    .pitch_rate_Kp  = 1.7,
+    .pitch_rate_Ki  = 0.6,
     .pitch_rate_Kd  = 0,
 
     .pitch_f_cut_rate_D = 0,
     .pitch_max_I = 100,
-    .pitch_pid_fcut = 40,
+    .pitch_pid_fcut = 20,
     .pitch_max_pid  = 500
 };
 

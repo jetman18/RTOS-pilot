@@ -49,18 +49,20 @@ int8_t is_baro_calibration(){
       return baro_calib;
 }
 
-void baro_calculate(float dt){
+void baro_update(float dt){  //100 hz update
     if(baro_calib != 1){
         return;
     }
     static uint16_t count = 0;
     static int32_t pre_alt = 0;
     int32_t alt = bmp280_read_fixed() - alt_offset;  // cm
-    altitude_filted += pt1FilterGain(2,dt)*(alt - altitude_filted);
-    if(count %10 == 0){
-        int climb = (altitude_filted - pre_alt)/(dt*10);
+    altitude_filted += pt1FilterGain(5,dt)*(alt - altitude_filted);
+    // calculate climb rate at 5hz
+    if(count %20 == 0){
+        int climb = (altitude_filted - pre_alt)/(dt*20);
         pre_alt = altitude_filted;
-        climb_rate += pt1FilterGain(1,dt*10)*(climb - climb_rate);
+        // apply low-pass filter
+        climb_rate += pt1FilterGain(1,dt*20)*(climb - climb_rate);
     }
     count ++;
 }

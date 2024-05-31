@@ -205,16 +205,28 @@ void blackbox_task(void const * argument)
 			black_box_pack_int(srri);
 			black_box_pack_char(' ');
 
-			/*----- atitude ---------------------*/
+			/*----- attitude ---------------------*/
 			black_box_pack_int((int)(AHRS.roll*100));
 			black_box_pack_char(' ');
 			black_box_pack_int((int)(roll_desired*100));
 			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.p*100));
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.roll_rate*100));
+			black_box_pack_char(' ');
+
 			black_box_pack_int((int)(AHRS.pitch*100));// cm
 			black_box_pack_char(' ');
 			black_box_pack_int((int)(pitch_desired*100));
 			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.q*100));
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.pitch_rate*100));
+			black_box_pack_char(' ');
+
 			black_box_pack_int((int)(AHRS.yaw*100));
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(AHRS.r*100));
 			black_box_pack_char(' ');
 			black_box_pack_int((int)(AHRS.yaw_rate*100));
 			black_box_pack_char(' ');
@@ -291,10 +303,12 @@ void ahrs_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4); // for debug
+	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4); // for debugging
 	//timer_calculate_boottime();
 	if(is_baro_calibration() == FALSE){
 		baro_zero_calibrate();
+	}else{
+		baro_update(0.01);
 	}
 	// get rc channel 
 	ibusFrameComplete();
@@ -302,7 +316,7 @@ void ahrs_task(void const * argument)
 	gps_readout();
 	update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],0.01);
 	attitude_ctrl_start(0.01);
-
+/*
 	if(ibusChannelData[CH10] > CHANNEL_HIGH && ibusChannelData[CH5] < CHANNEL_HIGH){
 		static uint32_t tim_;
 		if(millis() - tim_ > 200){
@@ -314,7 +328,7 @@ void ahrs_task(void const * argument)
 	}else{
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1,0);
 	}
-
+*/
 
 	static uint32_t gps_tim_ms;
 	if(millis() - gps_tim_ms > 200){

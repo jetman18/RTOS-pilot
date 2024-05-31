@@ -1,3 +1,4 @@
+plane.h:18:13:f_f	4	static
 maths.h:163:12:constrain	24	static
 utils.h:10:14:range360	16	static
 utils.h:17:14:range180	16	static
@@ -13,8 +14,8 @@ mavlink_helpers.h:99:25:mavlink_finalize_message	24	static
 mavlink_helpers.h:174:25:mavlink_msg_to_send_buffer	24	static
 mavlink_msg_heartbeat.h:49:24:mavlink_msg_heartbeat_pack	40	static
 mavlink_msg_rc_channels_raw.h:65:24:mavlink_msg_rc_channels_raw_pack	56	static
-mavlink_handler.c:29:6:mavlinkInit	24	static
-mavlink_handler.c:40:21:mavlink_uart_port	4	static
-mavlink_handler.c:65:6:mavlink_rc_raw	64	static
-mavlink_handler.c:159:6:mavlink_send_heartbeat	40	static
-mavlink_handler.c:172:6:mavlink_tx_cpl_callback	4	static
+mavlink_handler.c:27:6:mavlinkInit	24	static
+mavlink_handler.c:38:21:mavlink_uart_port	4	static
+mavlink_handler.c:63:6:mavlink_rc_raw	64	static
+mavlink_handler.c:157:6:mavlink_send_heartbeat	40	static
+mavlink_handler.c:170:6:mavlink_tx_cpl_callback	4	static

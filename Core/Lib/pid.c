@@ -52,6 +52,7 @@ void pid_reset(pid_ *pid_in)
 	pid_in->last_input = 0.0f;
    pid_in->D_filted = 0.0f;
    pid_in->err = 0;
+   pid_in->init = 1;
 }
 
 

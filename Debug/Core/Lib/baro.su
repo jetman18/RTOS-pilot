@@ -3,6 +3,6 @@ filter.h:13:21:pt1FilterGain	24	static
 baro.c:15:6:baro_init	16	static
 baro.c:30:6:baro_zero_calibrate	16	static
 baro.c:48:8:is_baro_calibration	4	static
-baro.c:52:6:baro_calculate	24	static
-baro.c:68:9:baro_get_climbCm	4	static
-baro.c:73:9:baro_get_altCm	4	static
+baro.c:52:6:baro_update	24	static
+baro.c:70:9:baro_get_climbCm	4	static
+baro.c:75:9:baro_get_altCm	4	static

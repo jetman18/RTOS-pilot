@@ -12,6 +12,8 @@
 #include "../Driver/mpu6050.h"
 #include "../Driver/hmc5883.h"
 
+#include "../flight/plane.h"
+
 #define OFFSET_CYCLE  1000
 #define USE_MAG 1
 
@@ -26,7 +28,7 @@ const float Ki_imu = 0;
 float Kp_imu = 0.2;
 const float Kp_mag = 5;
 
-float q0=1,q1=0,q2=0,q3=0;
+static float q0=1,q1=0,q2=0,q3=0;
 static float dcm[3][3];
 float cosx,cosy,cosz,sinx,siny, sinz,tany;
 
@@ -218,16 +220,35 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     	acc_Eframe[Z] = 0;
     }
 
-	AHRS.pitch = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]))*DEG;// - pitch_trim_imu;
-	AHRS.roll = -atan2_approx(-dcm[1][2],dcm[2][2])*DEG;//  - roll_trim_imu;
-	float yaw_ = -atan2_approx(dcm[0][1],dcm[0][0])*DEG;
+	float pitch_rad = atan2_approx(-dcm[1][2],dcm[2][2]);
+    float roll_rad = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]));
+	float yaw_rad = -atan2_approx(dcm[0][1],dcm[0][0]);
+
+	AHRS.pitch = pitch_rad*DEG + 2.3f;
+	AHRS.roll = roll_rad*DEG   - 5.45f;
+	float yaw_ = yaw_rad*DEG + 90.0f;;
+    // yaw 0 - 360
 	if(yaw_ < 0){
 		 yaw_ = 360 + yaw_;
 	}
 	AHRS.yaw =  yaw_;
-	AHRS.roll_rate  = gx_/config.gyr_lsb;
-	AHRS.pitch_rate = -gy_/config.gyr_lsb;
-	AHRS.yaw_rate   = -gz_/config.gyr_lsb;
 
+	float p = gx_/config.gyr_lsb;  // deg/s
+	float q = -gy_/config.gyr_lsb;
+	float r = -gz_/config.gyr_lsb;
+
+	AHRS.p   =  q;
+	AHRS.q   =  -p;
+	AHRS.r   =  r;
+    
+	float cosx = cos_approx(roll_rad);
+	float sinx = sin_approx(roll_rad);
+	float cosy = cos_approx(pitch_rad);
+	float tany = tan_approx(pitch_rad);
+	
+	// Body rate to euler rate (Deg/s)
+    AHRS.pitch_rate  = -(p + r*cosx*tany + q*sinx*tany);
+    AHRS.roll_rate = q*cosx - r*sinx;
+    AHRS.yaw_rate   = r*cosx/cosy + q*sinx/cosy;
 }
 
