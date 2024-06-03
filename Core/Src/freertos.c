@@ -49,6 +49,8 @@
 #include "../Driver/bmp280.h"
 
 #include "../flight/plane.h"
+
+#include "../HIL/dynamic_mode.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -115,11 +117,11 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of task1 */
-  osThreadDef(task1, blackbox_task, osPriorityLow, 0, 1024);
+  osThreadDef(task1, blackbox_task, osPriorityLow, 0, 512);
   task1Handle = osThreadCreate(osThread(task1), NULL);
 
   /* definition and creation of task2 */
-  osThreadDef(task2, ahrs_task, osPriorityHigh, 0, 1024);
+  osThreadDef(task2, ahrs_task, osPriorityHigh, 0, 512);
   task2Handle = osThreadCreate(osThread(task2), NULL);
 
   /* definition and creation of task3 */
@@ -149,7 +151,10 @@ uint16_t stack_task_blackbox;
 extern float roll_desired;
 extern float pitch_desired;
 extern float ab_speed_filted;
-extern float pid_velo_scale;;
+
+extern float pid_roll_velo_scaler;
+extern float pid_pitch_velo_scaler;
+
 extern int32_t puts_state;
 extern uint16_t servoL,servoR;
 uint32_t sdcard_fsize;
@@ -189,7 +194,7 @@ void blackbox_task(void const * argument)
 			int throtle = ((int)ibusChannelData[CH3] - 1000)*0.1;
 
 			// tx signal 0 -> 100 %
-			int srri = ((int)ibusChannelData[CH11] - 1000)*0.1;
+			//int srri = ((int)ibusChannelData[CH11] - 1000)*0.1;
 
 			/*** write time  ***/
 			black_box_pack_int(time_ms);
@@ -202,9 +207,10 @@ void blackbox_task(void const * argument)
 			black_box_pack_char(' ');
 			black_box_pack_int(throtle);
 			black_box_pack_char(' ');
+#ifndef HIL
 			black_box_pack_int(srri);
 			black_box_pack_char(' ');
-
+#endif
 			/*----- attitude ---------------------*/
 			black_box_pack_int((int)(AHRS.roll*100));
 			black_box_pack_char(' ');
@@ -232,6 +238,7 @@ void blackbox_task(void const * argument)
 			black_box_pack_char(' ');
 
 			/*------- GPS ----------------------*/
+#ifndef HIL
 			int16_t vx = _gps.velocity[0];  // cm/s
 			int16_t vy = _gps.velocity[1];  // cm/s
 			int16_t vz = _gps.velocity[2];  // cm/s
@@ -251,34 +258,39 @@ void blackbox_task(void const * argument)
 			black_box_pack_char(' ');
 			black_box_pack_int(ground_speed);
 			black_box_pack_char(' ');
-			black_box_pack_int((int)(pid_velo_scale*1000));   // cm
+			black_box_pack_int((int)(pid_roll_velo_scaler*100)); 
+			black_box_pack_char(' ');
+			black_box_pack_int((int)(pid_pitch_velo_scaler*100)); 
 			black_box_pack_char(' ');
 			black_box_pack_int(vz);
 			black_box_pack_char(' ');
 			black_box_pack_int(baro_climb);   // cm
 			black_box_pack_char(' ');
 			black_box_pack_int(baro_alt);   // cm
+#endif
 
 			/*----- end line && load data to sd card- -----*/
 			//sdcard_fsize = black_box_get_file_size();
 			black_box_pack_char('\n');
 			black_box_load();
-
+            // if write ok
 			if(puts_state != -1){
 				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 			}
 		vTaskDelayUntil( &xLastWakeTime, xFrequency);
-	#ifdef STACK_DEBUG
+#ifdef STACK_DEBUG
 	    stack_task_blackbox = uxTaskGetStackHighWaterMark( NULL );
-	#endif
+#endif
 	  }
   /* USER CODE END blackbox_task */
 }
 
 /* USER CODE BEGIN Header_ahrs_task */
+#ifndef HIL
 int16_t gyro_imu[3];
 int16_t acc_imu[3];
 int16_t mag_raw[3];
+#endif
 /**
 * @brief Function implementing the task2 thread.
 * @param argument: Not used
@@ -291,18 +303,22 @@ void ahrs_task(void const * argument)
   /* Infinite loop */
 	//vTaskSuspend(NULL);
 	attitude_ctrl_init();
+#ifndef HIL
 	initPWM(&htim3);
 	compassInit();
 	gps_init(&huart3,38400);
 	baro_init();
+#endif
 	mavlinkInit(1,1,&huart1,115200);
 	ibus_init(&huart2);
+
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 10; // 100 hz loop
 	xLastWakeTime = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
+#ifndef HIL
 	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4); // for debugging
 	//timer_calculate_boottime();
 	if(is_baro_calibration() == FALSE){
@@ -316,6 +332,14 @@ void ahrs_task(void const * argument)
 	gps_readout();
 	update_ahrs(gyro_imu[0],gyro_imu[1],gyro_imu[2],acc_imu[0],acc_imu[1],acc_imu[2],mag_raw[0],mag_raw[1],mag_raw[2],0.01);
 	attitude_ctrl_start(0.01);
+#endif
+	ibusFrameComplete();
+    // start dynamic mode
+	uint16_t thrust = ibusChannelData[CH3];
+	uint16_t servoLL = ibusChannelData[CH2];
+	uint16_t servoRR = ibusChannelData[CH1];
+	dynamic_control(thrust,servoLL,servoRR);
+	dynamic_loop(0.01);
 /*
 	if(ibusChannelData[CH10] > CHANNEL_HIGH && ibusChannelData[CH5] < CHANNEL_HIGH){
 		static uint32_t tim_;
@@ -367,6 +391,9 @@ void sensor_task(void const * argument)
   /* USER CODE BEGIN sensor_task */
   /* Infinite loop */
 	//vTaskSuspend(NULL);
+#ifdef HIL
+	vTaskSuspend(NULL);
+#else
 	int16_t gyso_offset[3] = {0,0,0};
 	axis3_t raw;
 	uint8_t sample_count = 0;
@@ -377,12 +404,15 @@ void sensor_task(void const * argument)
 	//i2cDectect(&hi2c2);
 	HAL_Delay(2000);
 	imu_calibrate(&gyso_offset[0],&gyso_offset[1],&gyso_offset[2]);
+#endif
 	TickType_t xLastWakeTime;
 	const TickType_t xFrequency = 2;
 	xLastWakeTime = xTaskGetTickCount();
 
 	for(;;)
 	{
+
+#ifndef HIL
 		mpu6050_gyro_get_raw(&raw);
 		gyro_add[0] += (raw.x - gyso_offset[0]);
 		gyro_add[1] += (raw.y - gyso_offset[1]);
@@ -420,7 +450,8 @@ void sensor_task(void const * argument)
 		acc_imu[0] += 0.1*(raw.x - acc_imu[0]);
 		acc_imu[1] += 0.1*(raw.y - acc_imu[1]);
 		acc_imu[2] += 0.1*(raw.z - acc_imu[2]);
-		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+#endif
+		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
 #ifdef STACK_DEBUG
 		stack_task_sensor = uxTaskGetStackHighWaterMark( NULL );
 #endif

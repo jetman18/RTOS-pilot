@@ -5,6 +5,7 @@ extern "C" {
 #endif
 #include "stm32f4xx_hal.h"
 #define FAST_RAM  __attribute__((section("ccmram")))
+#define HIL
 //#define SIMULATION
 // attitude controll
 
@@ -14,12 +15,7 @@ extern "C" {
 //extern uint16_t circle_stick;
 //extern uint16_t rtHome_stick;
 //void Autopilot();
-static uint8_t bufee[1000] __attribute__((section("ccmram"))) ;
-static void f_f(){
-	if(bufee[0]){
 
-	}
-}
 // mavlink handler
 void mavlinkInit(uint8_t syss_id, uint8_t comm_id,UART_HandleTypeDef *uartt,uint32_t baudrate);
 void mavlinkCallback();

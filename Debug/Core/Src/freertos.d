@@ -65,7 +65,8 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Core/Src/../Driver/interrupt.h ../Core/Src/../Driver/ibus.h \
  ../Core/Src/../Driver/../Lib/gps.h \
  ../Core/Src/../Driver/../flight/plane.h ../Core/Src/../Driver/ms5611.h \
- ../Core/Src/../Driver/bmp280.h ../Core/Src/../flight/plane.h
+ ../Core/Src/../Driver/bmp280.h ../Core/Src/../flight/plane.h \
+ ../Core/Src/../HIL/dynamic_mode.h
 
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 
@@ -234,3 +235,5 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Src/../Driver/bmp280.h:
 
 ../Core/Src/../flight/plane.h:
+
+../Core/Src/../HIL/dynamic_mode.h:

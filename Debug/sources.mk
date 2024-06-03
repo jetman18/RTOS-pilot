@@ -21,6 +21,7 @@ OBJCOPY_BIN :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 Core/Driver \
+Core/HIL \
 Core/Lib \
 Core/Src \
 Core/Startup \

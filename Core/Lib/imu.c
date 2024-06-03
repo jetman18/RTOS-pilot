@@ -25,8 +25,8 @@ float acc_Eframe[3];
 int16_t acc_Bframe[3];
 
 const float Ki_imu = 0;
-float Kp_imu = 0.2;
-const float Kp_mag = 5;
+float Kp_imu = 0.8;
+const float Kp_mag = 3;
 
 static float q0=1,q1=0,q2=0,q3=0;
 static float dcm[3][3];
@@ -224,8 +224,8 @@ void update_ahrs(int16_t gx_, int16_t gy_, int16_t gz_, int16_t accx_, int16_t a
     float roll_rad = -atan2_approx(-dcm[0][2],sqrtf(1 - dcm[0][2]*dcm[0][2]));
 	float yaw_rad = -atan2_approx(dcm[0][1],dcm[0][0]);
 
-	AHRS.pitch = pitch_rad*DEG + 2.3f;
-	AHRS.roll = roll_rad*DEG   - 5.45f;
+	AHRS.pitch = pitch_rad*DEG -4.0f;
+	AHRS.roll = roll_rad*DEG - 3.5f;
 	float yaw_ = yaw_rad*DEG + 90.0f;;
     // yaw 0 - 360
 	if(yaw_ < 0){

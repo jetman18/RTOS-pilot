@@ -54,7 +54,9 @@ static int16_t smooth_ch1=0, smooth_ch2=0;
 float roll_pid_rc_gain,pitch_pid_rc_gain;
 
 float ab_speed_filted;
-float pid_velo_scale;
+
+float pid_roll_velo_scaler;
+float pid_pitch_velo_scaler;
 
 int8_t manual_trim_state = 1;
 int16_t manual_trim_roll,manual_trim_pitch;
@@ -160,11 +162,13 @@ void attitude_ctrl_start(const float dt){
             }
             ab_speed_filted += pt1FilterGain(10,dt)*(absolute_velocity - ab_speed_filted);
             float speed_temp = constrainf(ab_speed_filted,MINIMUN_SPEED,MAXIMUN_SPEED);
-            pid_velo_scale = (float)MINIMUN_SPEED/((float)MINIMUN_SPEED + sq(speed_temp - MINIMUN_SPEED)*0.09f);
+            pid_roll_velo_scaler = (float)MINIMUN_SPEED/((float)MINIMUN_SPEED + sq(speed_temp - MINIMUN_SPEED)*0.09f);
+            pid_pitch_velo_scaler = (float)MINIMUN_SPEED/((float)MINIMUN_SPEED + sq(speed_temp - MINIMUN_SPEED)*0.1f);
         }
         else{
             speed_filter_reset = TRUE;
-            pid_velo_scale = 0.6f;
+            pid_roll_velo_scaler = 0.5f;
+            pid_pitch_velo_scaler = 0.5f;
             //pid_velo_scale = 1.0;
         }
 
@@ -175,8 +179,8 @@ void attitude_ctrl_start(const float dt){
         //    // priority to roll
         //}
         
-        const float pid_roll_vel_scale  = constrainf(pid_velo_scale,MIN_ROLL_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
-        const float pid_pitch_vel_scale = constrainf(pid_velo_scale,MIN_PITCH_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
+        const float pid_roll_vel_scale  = constrainf(pid_roll_velo_scaler,MIN_ROLL_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
+        const float pid_pitch_vel_scale = constrainf(pid_pitch_velo_scaler,MIN_PITCH_PID_SPEED_SCALE,MAX_PID_SPEED_SCALE);
 
         /*----- roll axis pid   -----*/
         const float roll_rate_measurement = AHRS.p;
@@ -201,10 +205,13 @@ void attitude_ctrl_start(const float dt){
 
         if(ibusChannelData[CH10] > CHANNEL_HIGH && ibusChannelData[CH5] > CHANNEL_HIGH){
             if(abs(roll_measurement) < 40 && abs(pitch_measurement) < 40){
-                pitch_measurement = altitude_Pid(DEFAULT_ALT);
+                pitch_measurement  += altitude_Pid(DEFAULT_ALT,0.01);
             }
+        }else{
+            altitude_pid_reset();
         }
         */
+        
 
         /*-----  pitch axis pid  ---------*/
         const float pitch_rate_measurement = AHRS.q;
@@ -230,21 +237,20 @@ void attitude_ctrl_start(const float dt){
 		}
 
         /*-------------- mix channel --------------------------*/
-
 		if(ibusChannelData[CH9] > CHANNEL_HIGH ){
                 // roll stabilize
-				int pitch_rc = 1500 - ibusChannelData[CH2];
-				//servoL = 1500 - roll_pid_smooth - pitch_rc;// + roll_trim  + pitch_trim;
-				//servoR = 1500 + roll_pid_smooth - pitch_rc;// - roll_trim  + pitch_trim;
-                servoL = 1500 + roll_pid_smooth;// + roll_trim  + pitch_trim;
-				servoR = 1500 - pitch_rc - manual_trim_roll;;// - roll_trim  + pitch_trim;
+				int pitch_rc = 1500 - ibusChannelData[CH2] + pitch_trim;
+				servoL = 1500 + roll_pid_smooth - pitch_rc;// + roll_trim  + pitch_trim;
+				servoR = 1500 - roll_pid_smooth - pitch_rc;// - roll_trim  + pitch_trim;
+                //servoL = 1500 + roll_pid_smooth;// + roll_trim  + pitch_trim;
+				//servoR = 1500 - pitch_rc - manual_trim_roll;;// - roll_trim  + pitch_trim;
 		}else{
                // pitch stabilize
-				int roll_rc = 1500 - ibusChannelData[CH1];
-				//servoL = 1500 +  roll_rc*0.5 - pitch_pid_smooth;//    + roll_trim  + pitch_trim;
-				//servoR = 1500 -  roll_rc*0.5 - pitch_pid_smooth;//    - roll_trim  + pitch_trim;
-                servoL = 1500 -  roll_rc + manual_trim_pitch;
-				servoR = 1500 +  pitch_pid_smooth;
+				int roll_rc = 1500 - ibusChannelData[CH1] + roll_trim ;
+				servoL = 1500 -  roll_rc*0.5 - pitch_pid_smooth;//    + roll_trim  + pitch_trim;
+				servoR = 1500 +  roll_rc*0.5 - pitch_pid_smooth;//    - roll_trim  + pitch_trim;
+                //servoL = 1500 -  roll_rc + manual_trim_pitch;
+				//servoR = 1500 +  pitch_pid_smooth;
 		}
 
         //servoL = 1500 - roll_pid_smooth - pitch_pid_smooth;
@@ -263,11 +269,11 @@ void attitude_ctrl_start(const float dt){
         smooth_ch1 += 0.7*(s1 - smooth_ch1);
         smooth_ch2 += 0.7*(s2 - smooth_ch2);
 
-        //servoL = 1500 + smooth_ch1 - smooth_ch2  + manual_trim_roll  + manual_trim_pitch;
-        //servoR = 1500 - smooth_ch1 - smooth_ch2  - manual_trim_roll  + manual_trim_pitch;
+        servoL = 1500 - smooth_ch1 - smooth_ch2  - manual_trim_roll  + manual_trim_pitch;
+        servoR = 1500 + smooth_ch1 - smooth_ch2  + manual_trim_roll  + manual_trim_pitch;
         
-        servoL = 1500 - smooth_ch1  + manual_trim_pitch;
-        servoR = 1500 + smooth_ch2  - manual_trim_roll;
+        //servoL = 1500 - smooth_ch1  + manual_trim_pitch;
+        //servoR = 1500 + smooth_ch2  - manual_trim_roll;
     }
     servoL = constrain(servoL,SERVO_MIN_PWM,SERVO_MAX_PWM);
     servoR = constrain(servoR,SERVO_MIN_PWM,SERVO_MAX_PWM);
