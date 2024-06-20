@@ -29,6 +29,7 @@
 #include "usart.h"
 #include "tim.h"
 #include "i2c.h"
+#include "stdio.h"
 
 #include "../Lib/timer.h"
 #include "../Lib/gps.h"
@@ -60,7 +61,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+int __io_putchar(int ch) {
+    ITM_SendChar(ch);
+    return ch;
+}
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -291,6 +295,10 @@ int16_t gyro_imu[3];
 int16_t acc_imu[3];
 int16_t mag_raw[3];
 #endif
+
+int *k;
+uint32_t ff;
+int kj[10];
 /**
 * @brief Function implementing the task2 thread.
 * @param argument: Not used
@@ -340,6 +348,11 @@ void ahrs_task(void const * argument)
 	uint16_t servoRR = ibusChannelData[CH1];
 	dynamic_control(thrust,servoLL,servoRR);
 	dynamic_loop(0.01);
+    uint32_t *k = (uint32_t*)0x20021000;
+    *k +=1;
+    if(k){
+
+    }
 /*
 	if(ibusChannelData[CH10] > CHANNEL_HIGH && ibusChannelData[CH5] < CHANNEL_HIGH){
 		static uint32_t tim_;

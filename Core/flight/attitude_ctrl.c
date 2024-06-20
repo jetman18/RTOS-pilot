@@ -81,6 +81,7 @@ void attitude_ctrl_init(){
             pid_profile_1.pitch_max_I);
 }
 
+
 int32_t baro_alt;
 int32_t baro_climb;
 float Kp_alt = 0.04f;
@@ -311,11 +312,9 @@ bool isFlying(){
 }
 
 
-
 /*
  *  Heading control function
- */
-/*
+*/
 #define MAX_PITCH_    30
 #define MAX_YAW_RATE  45  // 45 deg/sec
 #define HD_CTR_LOOP   0.01f
@@ -376,21 +375,15 @@ void heading_control(const float hd_desired, float *roll, float *pitch){
         cmd_roll_state = 0;
     }
 }
-*/
 
 /*
-static void Altitude_control(){
-
-}
-*/
-
-/*
-
+ * Rate stabilize
+ */
 void rate_stabilize(float dt){
     uint16_t servoL;
     uint16_t servoR;
 
-    v_estimate = dynamic_speed_esitmate(dt);
+    //v_estimate = dynamic_speed_esitmate(dt);
 
     if(ibusChannelData[CH5] > CHANNEL_HIGH ){
         float roll_rate_measurement = AHRS.roll_rate;
@@ -400,7 +393,7 @@ void rate_stabilize(float dt){
         float pitch_rate_desired = ((int)ibusChannelData[1] - 1500)*-0.5f;
 
         // pid scale with velocity
-        float pid_velo_scale = 1.0/(1 + sq(v_estimate)*0.0035f);
+        //float pid_velo_scale = 1.0/(1 + sq(v_estimate)*0.0035f);
 
         float r_rate  =  pid_calculate(&roll_rate_t, roll_rate_measurement,roll_rate_desired,1.0,dt);
         float p_rate  =  pid_calculate(&pitch_rate_t, pitch_rate_measurement,pitch_rate_desired,1.0,dt);
@@ -430,4 +423,4 @@ void rate_stabilize(float dt){
     write_pwm_ctrl(ibusChannelData[CH3],servoL,servoR);
 
 }
-*/
+
