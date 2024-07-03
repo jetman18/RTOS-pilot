@@ -34,23 +34,14 @@ Sử dụng hệ điều hành RTOS với 3 Task Realtime chính
 
 Sơ đồ hệ thống điều khiển
 
-<img align="center" src="./images/block.png" alt="img-name" width="900" height="500">
-
-### Tổ chức Files thư mục chính
-  Core  ./  Driver $~~~~~~~$    thư viện giao tiếp với các cảm biến   
-$~~~~~~~$ ./ epprom $~~~~~$    thư viện giao tiếp với epprom AT24c
-$~~~~~~~$ ./ flight $~~~~~~~~~$    thư viện xử lý chính cho UAV 
-$~~~~~~~$ ./ HIL $~~~~~~~~~~~$    thư viện mô phỏng HIL $~~$(loading ...) 
-$~~~~~~~$ ./ inc $~~~~~~~~~~~~$    thư viện chứa Header file do cubemx gen 
-$~~~~~~~$ ./ Lib $~~~~~~~~~~~~$    thư viện chung
-$~~~~~~~$ ./ mavlink $~~~~~$    thư viện giao tiếp mavlink 
-$~~~~~~~$ ./ Src $~~~~~~~~~~~$    thư viện chứa Source file do cubemx gen  
-$~~~~~~~$ ./ Startup
+<p align="center">
+<img src="./images/block.png" alt="img-name" width="700" height="400">
+<P/>
 
 
-## Thử nghiệm
-Cấu hình UAV thử nghiệm:
-- Sải cánh 1.2 m
+## Bay thử nghiệm
+Cấu hình UAV:
+- Sải cánh 1.2 m 
 - Trọng lượng 0.85 kg
 - Vận tốc tối đa 110 km/h
 - Thời gian bay 10 - 20 phút
@@ -61,6 +52,10 @@ Cấu hình đồ điện:
 - Pin lipo 3s 2200Mah
 - Bộ điều khiển Flysky Fs-i6
 - Bộ điều tốc 40A
+- 2 servo SG-60
+- Cam FPV 1800 vlt
+- Bộ phát sóng analog 600mw
+- gps m10 or neo 7m 
 
 Lắp đặt mạch và các linh kiện lên UAV
 
@@ -71,36 +66,36 @@ Lắp đặt mạch và các linh kiện lên UAV
 
 ## Dữ liệu bay thủ công
 
-##### Quỹ đạo bay từ GPS
+Quỹ đạo bay từ GPS
 
 <p align="center">
 <img  src="./images/flight_trajectory.jpg" alt="img-name" width="400" height="300"> 
 </p>
 
-##### Altitude baro vs gps
+Độ cao giữa cảm biến áp suất và GPS
 <p align="center">
 <img  src="./images/alt_baro_vs_gps.jpg" alt="img-name" width="700" height="330"> 
 </p>
 
-##### Roll && pitch angle
+góc Roll và pitch 
 <p align="center">
 <img  src="./images/roll_pitch_data.jpg" alt="img-name" width="700" height="330"> 
 </p>
 
-##### Ground speed from gps
+Ground speed from gps
 <p align="center">
 <img  src="./images/g_speed.jpg" alt="img-name" width="700" height="330"> 
 </p>
 
-## Attitude && PID controller
+### Attitude && PID controller
 
-##### Roll axis 
+Roll axis 
 
 <p align="center">
 <img src="./images/roll.png" width="700" height="350" />
 </p>
 
-##### Pitch axis 
+Pitch axis 
 
 <p align="center">
 <img src="./images/pitch1.png" width="700" height="350" />
