@@ -1,9 +1,8 @@
 # RTOS-pilot
 Mã nguồn và mạch điều khiển bay cho UAV cánh cố định sử dụng hệ điều hành thời gian thực FreeRTOS. Mạch sử dụng vi điều khiển chính STM32F407vet6 và vi điều khiển phụ STM32F103c8t6, vi điều khiển phụ được bổ sung nhằm xử lý tình huống khi mạch chính gặp lỗi treo hoặc các lỗi phần cứng khác. Mạch nguyên lý và PCB được thiết kế trên phần mềm Proteus.
 
-<img align="right" src="./images/fc1.jpg" alt="img-name" width="400" height="250">
-
-<img align="left" src="./images/3dmode.png" alt="img-name" width="400" height="250"> 
+<img align="right" src="./images/fc1.jpg" alt="img-name" width="350" height="230">
+<img align="left" src="./images/3dmode.png" alt="img-name" width="350" height="230"> 
 
 ## Phần cứng
 #### Cảm biến và các linh kiện chính
