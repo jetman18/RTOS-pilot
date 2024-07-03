@@ -1,5 +1,4 @@
 #include "EKF.h"
-
 #define toRAD 0.0174f
 
 // using Extended kalman filter to estimate 4 states q0 q1 q2 q3
@@ -19,9 +18,11 @@ float acc[3] = {0,0,1};
 float mag[3] = {0,0,1};
 
 
+
 /*
  *  Update measurement variance from sensor
  */
+
 void EKF_measurementVarianceUpdate(){
 
 }
@@ -154,7 +155,8 @@ void EKF_update(int16_t gx, int16_t gy, int16_t gz,
     float v4 = m_x   - mag[0];
     float v5 = m_y   - mag[1];
     float v6 = m_z   - mag[2];
-
+   
+   /* loading ... */
 
 
 
