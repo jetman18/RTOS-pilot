@@ -1,8 +1,11 @@
 # RTOS-pilot
 Mã nguồn và mạch điều khiển bay cho UAV cánh cố định sử dụng hệ điều hành thời gian thực FreeRTOS. Mạch sử dụng vi điều khiển chính STM32F407vet6 và vi điều khiển phụ STM32F103c8t6, vi điều khiển phụ được bổ sung nhằm xử lý tình huống khi mạch chính gặp lỗi treo hoặc các lỗi phần cứng khác. Mạch nguyên lý và PCB được thiết kế trên phần mềm Proteus.
 
-<img align="right" src="./images/fc1.jpg" alt="img-name" width="350" height="230">
-<img align="left" src="./images/3dmode.png" alt="img-name" width="350" height="230"> 
+<p align="center">
+<img src="./images/fc1.jpg" alt="img-name" width="400" height="280">
+
+<img src="./images/3dmode.png" alt="img-name" width="400" height="280"> 
+<p/>
 
 ## Phần cứng
 #### Cảm biến và các linh kiện chính
@@ -61,39 +64,45 @@ Cấu hình đồ điện:
 
 Lắp đặt mạch và các linh kiện lên UAV
 
+<p align="center">
+<img src="./images/datmach.jpg" alt="img-name" width="400" height="300"> <img  src="./images/fpvv.jpg" alt="img-name" width="400" height="300">
+</p>
 
-<img align="center" src="./images/datmach.jpg" alt="img-name" width="900" height="600">
 
+## Dữ liệu bay thủ công
 
-UAV dạng flying wing 
-
-<img  src="./images/fpvv.jpg" alt="img-name" width="900" height="600"> 
-
-### Dữ liệu bay thủ công
 ##### Quỹ đạo bay từ GPS
+
+<p align="center">
 <img  src="./images/flight_trajectory.jpg" alt="img-name" width="400" height="300"> 
+</p>
 
 ##### Altitude baro vs gps
+<p align="center">
 <img  src="./images/alt_baro_vs_gps.jpg" alt="img-name" width="700" height="330"> 
+</p>
 
 ##### Roll && pitch angle
+<p align="center">
 <img  src="./images/roll_pitch_data.jpg" alt="img-name" width="700" height="330"> 
+</p>
 
 ##### Ground speed from gps
+<p align="center">
 <img  src="./images/g_speed.jpg" alt="img-name" width="700" height="330"> 
-
+</p>
 
 ## Attitude && PID controller
 
 ##### Roll axis 
 
-[//]:<p align="center">
+<p align="center">
 <img src="./images/roll.png" width="700" height="350" />
 </p>
 
 ##### Pitch axis 
 
-[//]:<p align="center">
+<p align="center">
 <img src="./images/pitch1.png" width="700" height="350" />
 </p>
 
