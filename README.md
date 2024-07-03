@@ -87,15 +87,15 @@ Ground speed from gps
 <img  src="./images/g_speed.jpg" alt="img-name" width="700" height="330"> 
 </p>
 
-### Attitude && PID controller
+### Điều khiển trạng thái góc
 
-Roll axis 
+Đồ thị đáp ứng trục Roll 
 
 <p align="center">
 <img src="./images/roll.png" width="700" height="350" />
 </p>
 
-Pitch axis 
+Đồ thị đáp ứng trục Pitch 
 
 <p align="center">
 <img src="./images/pitch1.png" width="700" height="350" />
