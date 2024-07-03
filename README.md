@@ -1,9 +1,9 @@
 # RTOS-pilot
 Mã nguồn và mạch điều khiển bay cho UAV cánh cố định sử dụng hệ điều hành thời gian thực FreeRTOS. Mạch sử dụng vi điều khiển chính STM32F407vet6 và vi điều khiển phụ STM32F103c8t6, vi điều khiển phụ được bổ sung nhằm xử lý tình huống khi mạch chính gặp lỗi treo hoặc các lỗi phần cứng khác. Mạch nguyên lý và PCB được thiết kế trên phần mềm Proteus.
 
-<img align="right" src="./images/fc1.jpg" alt="img-name" width="500" height="300">
+<img align="right" src="./images/fc1.jpg" alt="img-name" width="400" height="250">
 
-<img align="left" src="./images/3dmode.png" alt="img-name" width="500" height="300"> 
+<img align="left" src="./images/3dmode.png" alt="img-name" width="400" height="250"> 
 
 ## Phần cứng
 #### Cảm biến và các linh kiện chính
@@ -71,35 +71,32 @@ UAV dạng flying wing
 <img  src="./images/fpvv.jpg" alt="img-name" width="900" height="600"> 
 
 ### Dữ liệu bay thủ công
-Quỹ đạo bay từ GPS
-<img  src="./images/flight_trajectory.jpg" alt="img-name" width="700" height="600"> 
+##### Quỹ đạo bay từ GPS
+<img  src="./images/flight_trajectory.jpg" alt="img-name" width="400" height="300"> 
 
-### Altitude baro vs gps
+##### Altitude baro vs gps
 <img  src="./images/alt_baro_vs_gps.jpg" alt="img-name" width="700" height="330"> 
 
-### Roll && pitch angle
+##### Roll && pitch angle
 <img  src="./images/roll_pitch_data.jpg" alt="img-name" width="700" height="330"> 
 
-### Ground speed from gps
+##### Ground speed from gps
 <img  src="./images/g_speed.jpg" alt="img-name" width="700" height="330"> 
 
 
 ## Attitude && PID controller
 
-### Roll axis 
+##### Roll axis 
 
 [//]:<p align="center">
 <img src="./images/roll.png" width="700" height="350" />
 </p>
 
-### Pitch axis 
+##### Pitch axis 
 
 [//]:<p align="center">
 <img src="./images/pitch1.png" width="700" height="350" />
 </p>
 
-### Altitude comparison
 
-[//]:<p align="center">
-<img src="./images/altitude_compare2.png" width="700" height="350" />
-</p>
+
