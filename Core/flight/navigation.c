@@ -55,7 +55,7 @@ void navigation_reset(){
 }
 
 
-/**************** Using Vector field method to guidance UAV *********************************/
+/**************** Using Vector field to guidance UAV *********************************/
 /* Perform circle loiter
  * Param 1 latitude   10^7
  * Param 2 longitude  10^7
@@ -190,3 +190,44 @@ void navigation_set_home_pos(int lat, int lon, int alt){
    wp[0].altitude = alt;
 }
 
+/******************************L1 methob*************************** */
+
+#define L1 40 // m
+#define DT = 0.1
+#define gravity 9.81
+static int loiter_l1_reset = 1;
+
+
+static int loiter_L1(float hg, float v ,uint32_t aircraf_lat,uint32_t aircraf_lon, int32_t center_lat, int32_t center_lon ,uint32_t radius_desired) 
+{
+   static int pre_cross_track;
+   static int heading_cmd;
+   static int dot_cross_track;
+
+   // calc heading to center of circle
+   float bearing_ = course_over_ground(aircraf_lat,aircraf_lon,center_lat,center_lon);
+   // caculate distance to center of circle
+   int dist = distanceBetweenTwoPoint(aircraf_lat,aircraf_lon,center_lat,center_lon);
+   int cross_track = dist - radius_desired;
+   if(loiter_l1_reset){
+      pre_cross_track = cross_track;
+      loiter_l1_reset = 0;
+      return heading_cmd;
+   }
+   // calc derivative of cross track
+   int dot_cross_track_temp = (cross_track - pre_cross_track)/DT;
+   // apply low pass filter
+   dot_cross_track += pt1FilterGain(1,DT)*(dot_cross_track_temp - dot_cross_track);
+   pre_cross_track = cross_track;
+
+   if(cross_track < L1){
+      float acc_cmd = 2*v/L1 * (dot_cross_track + v/L1 * cross_track);
+      float eta_angle  = atan2_approx(acc_cmd,gravity) * DEG;
+      eta_angle = constrainf(eta_angle, -60.0f, 60.0f);
+      heading_cmd = hg - eta_angle;
+   }else{ // vector field
+      heading_cmd = bearing_ + atan2_approx(radius_desired,dist)* DEG;
+   }
+   heading_cmd = range360(heading_cmd);
+   return heading_cmd;
+}
