@@ -143,7 +143,7 @@ Hình[6]: Đồ thị đáp ứng trục Pitch
 Do thời gian làm đồ án hạn chế và thử nghiệm thực tế khá tốn kếm nên phần thực nghiệm hiện đang dừng lại ở phần ổn định góc trạng thái, các phần vận tốc, độ cao và quỹ đạo đang được phát triển tiếp.
 
 ### Mô phỏng HIL bay bám quỹ đạo
-##### Bám quỹ đạo tròn so sánh hai phương pháp Vector fiedl và L1
+##### Bám quỹ đạo tròn so sánh hai phương pháp Vector field và L1
 
 Thử nghiệm với bán kính 250M và với các mức gió 0 10 20 m/s
 
