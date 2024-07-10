@@ -54,19 +54,16 @@ Cấu hình UAV:
 - Trọng lượng 0.85 kg
 - Vận tốc tối đa 110 km/h
 - Thời gian bay 10 - 20 phút
-
-Cấu hình đồ điện:
-
 - Motor sunnysky 2216 2400 kv 
 - Pin lipo 3s 2200Mah
 - Bộ điều khiển Flysky Fs-i6
 - Bộ điều tốc 40A
 - 2 servo SG-60
 - Cam FPV 1800 vlt
-- Bộ phát sóng analog 600mw
-- gps m10 or neo 7m 
+- Bộ phát sóng Analog 600mw
+- GPS m10 hoặc neo 7m 
 
-Lắp đặt mạch và các linh kiện lên UAV sao cho các mạch và linh kiện được xắp xếp hợp lý đảm cân bằng trọng tâm cho UAV, đảm bảo dễ dàng tháo lắp khi sảy ra hỏng hóc.
+Lắp đặt mạch và các linh kiện lên UAV sao cho các mạch và linh kiện được xắp xếp hợp lý đảm bảo cân bằng trọng tâm cho UAV và dễ dàng tháo lắp khi sảy ra hỏng hóc.
 
 <p align="center">
 <img src="./image/datmach.jpg" alt="img-name" width="400" height="300"> <img  src="./image/fpvv.jpg" alt="img-name" width="400" height="300">
@@ -115,21 +112,22 @@ Hình[4]: Vận tốc mặt đất từ GPS
 </p>
 
 
-### Điều khiển ổn định trạng thái góc bay thực tế
-##### Ổn định trục Roll
-Kết quả thử nghiệm thực tế bay ổn định góc trạng thái Roll và Pitch sau nhiều lần thử nghiệm. Kết quả bám giá trị góc mong muốn khá tốt với góc Roll cả về sai số và độ vọt lố với thời gian bay trong 2 phút. 
+### Kết quả bay thực tế ổn định trạng thái góc
+##### Ổn định góc Roll
+Kết quả bay thực tế điều khiển ổn định góc trạng thái góc sau nhiều lần thử nghiệm và tinh chỉnh hệ số. Kết quả góc Roll bám góc mong muốn khá tốt và sai số tĩnh tương đối nhỏ. 
 
 <p align="center">
 <img src="./image/roll.png" width="700" height="350" />
 </p>
 
 <p align="center">
-Hình[5]: Đồ thị đáp ứng trục Roll 
+Hình[5]:  Đồ thị đáp ứng trục Roll 
 </p>
 
-##### Ổn định trục Pitch
+##### Ổn định góc Pitch
 
-Với góc Pitch thời gian đáp ứng còn chậm và sai số lớn, tồn tại dao động với tần số cao có thể do vị trí trọng tâm UAV chưa đúng do đó mà trục Pitch rất không ổn định và khó turn PID. 
+Với góc Pitch thời gian đáp ứng còn chậm và sai số tĩnh lớn, tồn tại dao động với tần số cao, các vấn đề trên có thể do vị trí trọng tâm UAV chưa đúng do đó mà trục Pitch rất không ổn định và khó tinh chỉnh PID. 
+
 
 <p align="center">
 <img src="./image/pitch2.png" width="700" height="350" />
@@ -140,19 +138,36 @@ Hình[6]: Đồ thị đáp ứng trục Pitch
 </p>
 
 ##### Với các trạng thái khác
-Do thời gian làm đồ án hạn chế và thử nghiệm thực tế khá tốn kếm nên phần thực nghiệm hiện đang dừng lại ở phần ổn định góc trạng thái, các phần vận tốc, độ cao và quỹ đạo đang được phát triển tiếp.
+**Do thời gian thực nghiệm của đồ án khá ngắn và sân bãi  thử nghiệm còn hạn chế nên phần thực nghiệm hiện đang dừng lại ở phần ổn định góc trạng thái các phần như điều khiển vận tốc, độ cao và quỹ đạo vẫn đang tiếp tục được phát triển.**
 
 ### Mô phỏng HIL bay bám quỹ đạo
+
+#### Thiết lập phần cứng
+
+Mạch điều khiển bay sử dụng 3 cổng UART, 1 cổng kết nối với mạch Receiver qua giao thức Ibus nhận lệnh điều khiển từ người dùng, 1 cổng để gửi các dữ liệu trạng thái góc, tọa độ đến phần mềm bay giả lập Flightgear qua giao thức Generic , cổng còn lại sử dụng để gửi dữ liệu trạng thái, các thông số điện áp của pin, tốc độ bay, vị trí đến phần mềm giám sát bay Qgroundcontrol qua giao thức Mavlink. Để tránh phải giao tiếp hai chiều với phần mềm Flightgear, mô hình động lực học UAV được nhúng và chạy trong mạch điều khiển.
+
+<p align="center">
+<img src="./image/HIL.png" width=600" height="430" />
+</p>
+
+
+<p align="center">
+Hình[7]: Thiết lập phần cứng mô phỏng
+</p>
+
+Phần mềm giám sát được sử dụng là Qgroundcontrol và Flightgear trong đó Qgroundcontrol sử dụng để giám sát máy bay không chỉ trong mô phỏng mà còn trong bay thực tế với máy bay thật, phần mềm hiển thị vị trí các góc trạng thái, vận tốc bay , điện áp pin và dung lượng pin vv. Phần mềm flightgear sử dụng để giám sát trực quan hơn trong quá trình mô phỏng, giúp dễ dàng quan sát đáp ứng của máy bay với lệnh điều khiển cũng như những tác nhân bên ngoài.  
+
+
 ##### Bám quỹ đạo tròn so sánh hai phương pháp Vector fiedl và L1
 
-Thử nghiệm với bán kính 250M và với các mức gió 0 10 20 m/s
+Thử nghiệm với bán kính 250 m và với các mức gió 0, 10, 20 m/s
 
 <p align="center">
 <img src="./image/vtf1.png" width=700" height="170" />
 </p>
 
 <p align="center">
-Hình[7]: Quỹ đạo bay với Vector field 
+Hình[8]: Quỹ đạo bay với Vector field 
 </p>
 
 <p align="center">
@@ -160,10 +175,10 @@ Hình[7]: Quỹ đạo bay với Vector field
 </p>
 
 <p align="center">
-Hình[8]: Quỹ đạo bay với L1 
+Hình[9]: Quỹ đạo bay với L1 
 </p>
 
-Bộ L1 cho kết quả tốt hơn rất nhiều về độ vọt lố cũng như sai số tĩnh với các mức gió khác nhau.
+Từ kết quả mô phỏng có thể thấy phương pháp L1 cho đáp ứng tốt về khả năng bám quỹ đạo cũng như sai số tĩnh là nhỏ nhất, và độ vọt lố rất nhỏ so với trường véc tơ. Do đó mà phương pháp L1 được sử dụng rất phổ biến hiện nay trong các mã nguồn mở như Ardupilot, PX4.
 
 
 

@@ -121,11 +121,11 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of task1 */
-  osThreadDef(task1, blackbox_task, osPriorityLow, 0, 512);
+  osThreadDef(task1, blackbox_task, osPriorityLow, 0, 1024);
   task1Handle = osThreadCreate(osThread(task1), NULL);
 
   /* definition and creation of task2 */
-  osThreadDef(task2, ahrs_task, osPriorityHigh, 0, 512);
+  osThreadDef(task2, ahrs_task, osPriorityHigh, 0, 1024);
   task2Handle = osThreadCreate(osThread(task2), NULL);
 
   /* definition and creation of task3 */
