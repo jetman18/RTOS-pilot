@@ -159,6 +159,9 @@ Phần mềm giám sát được sử dụng là Qgroundcontrol và Flightgear t
 
 
 ##### Bám quỹ đạo tròn so sánh hai phương pháp Vector fiedl và L1
+=======
+##### Bám quỹ đạo tròn so sánh hai phương pháp Vector field và L1
+>>>>>>> 37392cf1a4c90a3c569f0f91704dabab472238e6
 
 Thử nghiệm với bán kính 250 m và với các mức gió 0, 10, 20 m/s
 
