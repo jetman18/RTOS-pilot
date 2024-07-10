@@ -163,7 +163,7 @@ Hình[7]: Quỹ đạo bay với Vector field
 Hình[8]: Quỹ đạo bay với L1 
 </p>
 
-Bộ L1 cho kết quả tốt hơn dất nhiều về độ vọt lố cũng như sai số tĩnh với các mức gió khác nhau.
+Bộ L1 cho kết quả tốt hơn rất nhiều về độ vọt lố cũng như sai số tĩnh với các mức gió khác nhau.
 
 
 
