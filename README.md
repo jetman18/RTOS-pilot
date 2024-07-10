@@ -41,11 +41,15 @@ Sử dụng hệ điều hành RTOS với 3 Task Realtime chính
 - Task 2: Tần số 100Hz nhiệm vụ ước lượng góc trạng thái Roll, Pitch, Yaw sử dụng thuật toán Mahony filter kết hợp các phép đo từ cảm biến gia tốc, vận tốc góc và la bàn
 - Task 3: Tần số <= 100 Hz, có nhiệm vụ lưu dữ liệu bay vào thẻ nhớ nhằm sử dụng để phân tích dữ liệu cũng như xác định lỗi khi UAV bị rơi 
 
-Sơ đồ hệ thống điều khiển
+
 
 <p align="center">
-<img src="./image/block.png" alt="img-name" width="700" height="400">
+<img src="./image/block.png" alt="img-name" width="500" height="300">
 <P/>
+
+<p align="center">
+Sơ đồ hệ thống điều khiển
+</p>
 
 
 ## Bay thử nghiệm
