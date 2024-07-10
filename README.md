@@ -158,10 +158,9 @@ Hình[7]: Thiết lập phần cứng mô phỏng
 Phần mềm giám sát được sử dụng là Qgroundcontrol và Flightgear trong đó Qgroundcontrol sử dụng để giám sát máy bay không chỉ trong mô phỏng mà còn trong bay thực tế với máy bay thật, phần mềm hiển thị vị trí các góc trạng thái, vận tốc bay , điện áp pin và dung lượng pin vv. Phần mềm flightgear sử dụng để giám sát trực quan hơn trong quá trình mô phỏng, giúp dễ dàng quan sát đáp ứng của máy bay với lệnh điều khiển cũng như những tác nhân bên ngoài.  
 
 
-##### Bám quỹ đạo tròn so sánh hai phương pháp Vector fiedl và L1
-=======
-##### Bám quỹ đạo tròn so sánh hai phương pháp Vector field và L1
->>>>>>> 37392cf1a4c90a3c569f0f91704dabab472238e6
+#### Bám quỹ đạo tròn so sánh hai phương pháp Vector fiedl và L1
+
+
 
 Thử nghiệm với bán kính 250 m và với các mức gió 0, 10, 20 m/s
 
