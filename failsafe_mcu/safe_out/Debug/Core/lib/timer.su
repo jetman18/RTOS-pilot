@@ -1,0 +1,5 @@
+timer.c:9:17:setoverFlow	24	static
+timer.c:21:6:timer_start	16	static
+timer.c:27:20:timer_name	4	static
+timer.c:31:6:resetCounter	4	static
+timer.c:34:6:timer_callback	4	static

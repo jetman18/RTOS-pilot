@@ -1,0 +1,11 @@
+checksum.h:28:20:crc_accumulate	24	static
+checksum.h:45:20:crc_init	16	static
+mavlink_helpers.h:17:34:mavlink_get_channel_status	16	static
+mavlink_helpers.h:33:35:mavlink_get_channel_buffer	16	static
+mavlink_helpers.h:196:21:mavlink_start_checksum	16	static
+mavlink_helpers.h:201:21:mavlink_update_checksum	16	static
+mavlink_helpers.h:247:24:mavlink_parse_char	40	static
+mavlink_msg_rc_channels_raw.h:432:20:mavlink_msg_rc_channels_raw_decode	16	static
+mavlink_handler.c:17:6:mavlink_init	16	static
+mavlink_handler.c:23:6:mavlink_callback	16	static
+mavlink_handler.c:53:9:mavlink_check_fc_healthy	16	static

@@ -1,0 +1,6 @@
+ibus.c:25:6:ibus_init	24	static
+ibus.c:41:21:ibus_uart_port	4	static
+ibus.c:46:6:ibus_run	8	static
+ibus.c:64:6:ibus_calback	8	static
+ibus.c:75:13:ibusDataReceive	24	static
+ibus.c:100:5:ibusFrameComplete	16	static
