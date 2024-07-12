@@ -190,7 +190,7 @@ void navigation_set_home_pos(int lat, int lon, int alt){
    wp[0].altitude = alt;
 }
 
-/******************************L1 methob*************************** */
+/******************************L1 method*************************** */
 
 #define L1 40 // m
 #define DT = 0.1
